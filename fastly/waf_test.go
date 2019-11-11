@@ -261,13 +261,13 @@ func TestClient_GetWAF_validation(t *testing.T) {
 		t.Errorf("bad error: %s", err)
 	}
 
-	// _, err = testClient.GetWAF(&GetWAFInput{
-	// 	Service: "foo",
-	// 	Version: "1",
-	// })
-	// if err != ErrMissingWAFID {
-	// 	t.Errorf("bad error: %s", err)
-	// }
+	_, err = testClient.GetWAF(&GetWAFInput{
+		Service: "foo",
+		Version: "1",
+	})
+	if err != ErrMissingWAFID {
+		t.Errorf("bad error: %s", err)
+	}
 }
 
 //
