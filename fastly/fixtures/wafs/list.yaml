@@ -1,36 +1,32 @@
 ---
 version: 1
-rwmutex: {}
 interactions:
 - request:
     body: ""
     form: {}
     headers:
-      Fastly-Key:
-      - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
       User-Agent:
-      - FastlyGo/0.4.3.dev (+github.com/fastly/go-fastly; go1.12)
-    url: https://api.fastly.com/service/7i6HN3TK9wS159v2gPAZ8A/version/54/wafs
+      - FastlyGo/1.3.0 (+github.com/fastly/go-fastly; go1.13.3)
+    url: https://api.fastly.com/waf/firewalls?filter%5Bservice_id%5D=3hn15tWwwLhD47TJAYqj3C
     method: GET
   response:
-    body: '{"data":[{"id":"2WK9ofHfHcPi3s6S2X0Z8m","type":"waf","attributes":{"last_push":null,"prefetch_condition":"test-waf-condition","response":"test-response-object","version":54,"service_id":"7i6HN3TK9wS159v2gPAZ8A","disabled":false,"rule_statuses_log_count":0,"rule_statuses_block_count":0,"rule_statuses_disabled_count":0}}],"links":{"last":"https://api.fastly.com/service/7i6HN3TK9wS159v2gPAZ8A/version/54/wafs?page[number]=1\u0026page[size]=100","first":"https://api.fastly.com/service/7i6HN3TK9wS159v2gPAZ8A/version/54/wafs?page[number]=1\u0026page[size]=100"},"meta":{"current_page":1,"per_page":100,"record_count":1,"total_pages":1}}'
+    body: '{"data":[],"links":{"last":"https://api.fastly.com/waf/firewalls?filter[service_id]=3hn15tWwwLhD47TJAYqj3C\u0026page[number]=1\u0026page[size]=100","first":"https://api.fastly.com/waf/firewalls?filter[service_id]=3hn15tWwwLhD47TJAYqj3C\u0026page[number]=1\u0026page[size]=100"},"meta":{"current_page":1,"per_page":100,"record_count":0,"total_pages":1}}'
     headers:
       Accept-Ranges:
       - bytes
       Age:
       - "0"
       Content-Length:
-      - "635"
+      - "352"
       Content-Type:
       - application/vnd.api+json
       Date:
-      - Sat, 11 May 2019 21:45:01 GMT
+      - Mon, 11 Nov 2019 09:47:11 GMT
       Status:
       - 200 OK
       Strict-Transport-Security:
       - max-age=31536000
       Via:
-      - 1.1 varnish
       - 1.1 varnish
       X-Cache:
       - MISS, MISS
@@ -39,8 +35,9 @@ interactions:
       X-Content-Type-Options:
       - nosniff
       X-Served-By:
-      - cache-control-slwdc9036-CONTROL-SLWDC, cache-lax8631-LAX
+      - cache-control-slwdc9035-CONTROL-SLWDC, cache-lcy19247-LCY
       X-Timer:
-      - S1557611101.825257,VS0,VE468
+      - S1573465631.907164,VS0,VE653
     status: 200 OK
     code: 200
+    duration: ""

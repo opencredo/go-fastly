@@ -22,13 +22,21 @@ type WAFConfigurationSet struct {
 
 // WAF is the information about a firewall object.
 type WAF struct {
-	ID                string     `jsonapi:"primary,waf"`
-	Version           int        `jsonapi:"attr,version"`
-	PrefetchCondition string     `jsonapi:"attr,prefetch_condition"`
-	Response          string     `jsonapi:"attr,response"`
-	LastPush          *time.Time `jsonapi:"attr,last_push,iso8601"`
-
-	ConfigurationSet *WAFConfigurationSet `jsonapi:"relation,configuration_set"`
+	ID                             string     `jsonapi:"primary,waf_firewall"`
+	ServiceID                      string     `jsonapi:"attr,service_id"`
+	ServiceVersion                 int        `jsonapi:"attr,service_version_number"`
+	PrefetchCondition              string     `jsonapi:"attr,prefetch_condition"`
+	Response                       string     `jsonapi:"attr,response"`
+	Disabled                       bool       `jsonapi:"attr,disabled"`
+	CreatedAt                      *time.Time `jsonapi:"attr,created_at,iso8601"`
+	UpdatedAt                      *time.Time `jsonapi:"attr,updated_at,iso8601"`
+	ActiveRulesTrustwaveLogCount   int        `jsonapi:"attr,active_rules_trustwave_log_count"`
+	ActiveRulesTrustwaveBlockCount int        `jsonapi:"attr,active_rules_trustwave_block_count"`
+	ActiveRulesFastlyLogCount      int        `jsonapi:"attr,active_rules_fastly_log_count"`
+	ActiveRulesFastlyBlockCount    int        `jsonapi:"attr,active_rules_fastly_block_count"`
+	ActiveRulesOWASPLogCount       int        `jsonapi:"attr,active_rules_owasp_log_count"`
+	ActiveRulesOWASPBlockCount     int        `jsonapi:"attr,active_rules_owasp_block_count"`
+	ActiveRulesOWASPScoreCount     int        `jsonapi:"attr,active_rules_owasp_score_count"`
 }
 
 // wafType is used for reflection because JSONAPI wants to know what it's
@@ -41,7 +49,7 @@ type ListWAFsInput struct {
 	Service string
 
 	// Version is the specific configuration version (required).
-	Version int
+	Version string
 }
 
 // ListWAFs returns the list of wafs for the configuration version.
@@ -50,12 +58,16 @@ func (c *Client) ListWAFs(i *ListWAFsInput) ([]*WAF, error) {
 		return nil, ErrMissingService
 	}
 
-	if i.Version == 0 {
+	if i.Version == "" {
 		return nil, ErrMissingVersion
 	}
 
-	path := fmt.Sprintf("/service/%s/version/%d/wafs", i.Service, i.Version)
-	resp, err := c.Get(path, nil)
+	path := fmt.Sprint("/waf/firewalls")
+	resp, err := c.Get(path, &RequestOptions{
+		Params: map[string]string{
+			"filter[service_id]": i.Service,
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -76,29 +88,28 @@ func (c *Client) ListWAFs(i *ListWAFsInput) ([]*WAF, error) {
 	return wafs, nil
 }
 
-// CreateWAFInput is used as input to the CreateWAF function.
-type CreateWAFInput struct {
+// WAFInput is used as input to the CreateWAF and UpdateWAF function.
+type WAFInput struct {
 	// Service is the ID of the service. Version is the specific configuration
 	// version. Both fields are required.
-	Service string
-	Version int
-
-	ID                string `jsonapi:"primary,waf"`
-	PrefetchCondition string `jsonapi:"attr,prefetch_condition,omitempty"`
-	Response          string `jsonapi:"attr,response,omitempty"`
+	ID                string `jsonapi:"primary,waf_firewall"`
+	Service           string `jsonapi:"attr,service_id"`
+	Version           string `jsonapi:"attr,service_version_number"`
+	PrefetchCondition string `jsonapi:"attr,prefetch_condition"`
+	Response          string `jsonapi:"attr,response"`
 }
 
 // CreateWAF creates a new Fastly WAF.
-func (c *Client) CreateWAF(i *CreateWAFInput) (*WAF, error) {
+func (c *Client) CreateWAF(i *WAFInput) (*WAF, error) {
 	if i.Service == "" {
 		return nil, ErrMissingService
 	}
 
-	if i.Version == 0 {
+	if i.Version == "" {
 		return nil, ErrMissingVersion
 	}
 
-	path := fmt.Sprintf("/service/%s/version/%d/wafs", i.Service, i.Version)
+	path := "/waf/firewalls"
 	resp, err := c.PostJSONAPI(path, i, nil)
 	if err != nil {
 		return nil, err
@@ -116,18 +127,18 @@ type GetWAFInput struct {
 	// Service is the ID of the service. Version is the specific configuration
 	// version. Both fields are required.
 	Service string
-	Version int
-
+	Version string
 	// ID is the id of the WAF to get.
 	ID string
 }
 
+// GetWAF gets details for given WAF
 func (c *Client) GetWAF(i *GetWAFInput) (*WAF, error) {
 	if i.Service == "" {
 		return nil, ErrMissingService
 	}
 
-	if i.Version == 0 {
+	if i.Version == "" {
 		return nil, ErrMissingVersion
 	}
 
@@ -135,8 +146,12 @@ func (c *Client) GetWAF(i *GetWAFInput) (*WAF, error) {
 		return nil, ErrMissingWAFID
 	}
 
-	path := fmt.Sprintf("/service/%s/version/%d/wafs/%s", i.Service, i.Version, i.ID)
-	resp, err := c.Get(path, nil)
+	path := fmt.Sprintf("/waf/firewalls/%s", i.ID)
+	resp, err := c.Get(path, &RequestOptions{
+		Params: map[string]string{
+			"filter[service_version_number]": i.Version,
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -148,25 +163,13 @@ func (c *Client) GetWAF(i *GetWAFInput) (*WAF, error) {
 	return &waf, nil
 }
 
-// UpdateWAFInput is used as input to the UpdateWAF function.
-type UpdateWAFInput struct {
-	// Service is the ID of the service. Version is the specific configuration
-	// version. Both fields are required.
-	Service string
-	Version int
-
-	ID                string `jsonapi:"primary,waf"`
-	PrefetchCondition string `jsonapi:"attr,prefetch_condition,omitempty"`
-	Response          string `jsonapi:"attr,response,omitempty"`
-}
-
 // UpdateWAF updates a specific WAF.
-func (c *Client) UpdateWAF(i *UpdateWAFInput) (*WAF, error) {
+func (c *Client) UpdateWAF(i *WAFInput) (*WAF, error) {
 	if i.Service == "" {
 		return nil, ErrMissingService
 	}
 
-	if i.Version == 0 {
+	if i.Version == "" {
 		return nil, ErrMissingVersion
 	}
 
@@ -174,7 +177,7 @@ func (c *Client) UpdateWAF(i *UpdateWAFInput) (*WAF, error) {
 		return nil, ErrMissingWAFID
 	}
 
-	path := fmt.Sprintf("/service/%s/version/%d/wafs/%s", i.Service, i.Version, i.ID)
+	path := fmt.Sprintf("/waf/firewalls/%s", i.ID)
 	resp, err := c.PatchJSONAPI(path, i, nil)
 	if err != nil {
 		return nil, err
@@ -187,23 +190,84 @@ func (c *Client) UpdateWAF(i *UpdateWAFInput) (*WAF, error) {
 	return &waf, nil
 }
 
-// DeleteWAFInput is used as input to the DeleteWAFInput function.
-type DeleteWAFInput struct {
-	// Service is the ID of the service. Version is the specific configuration
-	// version. Both fields are required.
-	Service string
-	Version int
+// EnableWAF updates a specific WAF.
+func (c *Client) EnableWAF(id string) error {
 
-	// ID is the id of the WAF to delete.
-	ID string
+	if id == "" {
+		return ErrMissingWAFID
+	}
+
+	path := fmt.Sprintf("/waf/firewalls/%s/enable", id)
+	resp, err := c.PatchJSONAPI(path, &WAFInput{}, nil)
+	if err != nil {
+		return err
+	}
+
+	var waf WAF
+	if err := jsonapi.UnmarshalPayload(resp.Body, &waf); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (c *Client) DeleteWAF(i *DeleteWAFInput) error {
-	if i.Service == "" {
-		return ErrMissingService
+// DisableWAF disables a WAF
+func (c *Client) DisableWAF(id string) error {
+
+	if id == "" {
+		return ErrMissingWAFID
+	}
+
+	path := fmt.Sprintf("/waf/firewalls/%s/disable", id)
+	resp, err := c.PatchJSONAPI(path, &WAFInput{}, nil)
+	if err != nil {
+		return err
+	}
+
+	var waf WAF
+	if err := jsonapi.UnmarshalPayload(resp.Body, &waf); err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeployWAFInput used to deploy a WAF
+type DeployWAFInput struct {
+	// These are the Id and version of the WAF
+	ID      string
+	Version int
+}
+
+// DeployWAFVersion deploys (activate) a WAF
+func (c *Client) DeployWAFVersion(i *DeployWAFInput) error {
+
+	if i.ID == "" {
+		return ErrMissingWAFID
 	}
 
 	if i.Version == 0 {
+		return ErrMissingVersion
+	}
+
+	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d", i.ID, i.Version)
+	_, err := c.PostJSONAPI(path, i, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteWAFInput is used as input to the DeleteWAFInput function.
+type DeleteWAFInput struct {
+	// this is the WAF id
+	ID string `jsonapi:"primary,waf_firewall"`
+	// The service version
+	Version string `jsonapi:"attr,service_version_number"`
+}
+
+// DeleteWAF deletes a given WAF from its service
+func (c *Client) DeleteWAF(i *DeleteWAFInput) error {
+
+	if i.Version == "" {
 		return ErrMissingVersion
 	}
 
@@ -211,8 +275,8 @@ func (c *Client) DeleteWAF(i *DeleteWAFInput) error {
 		return ErrMissingWAFID
 	}
 
-	path := fmt.Sprintf("/service/%s/version/%d/wafs/%s", i.Service, i.Version, i.ID)
-	_, err := c.Delete(path, nil)
+	path := fmt.Sprintf("/waf/firewalls/%s", i.ID)
+	_, err := c.DeleteJSON(path, i, nil)
 	return err
 }
 
@@ -264,7 +328,7 @@ func (c *Client) GetOWASP(i *GetOWASPInput) (*OWASP, error) {
 	if i.Service == "" {
 		return nil, ErrMissingService
 	}
-
+	
 	if i.ID == "" {
 		return nil, ErrMissingWAFID
 	}
