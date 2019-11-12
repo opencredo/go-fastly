@@ -3,6 +3,7 @@ package fastly
 import (
 	"bytes"
 	"io/ioutil"
+	"reflect"
 	"strconv"
 	"testing"
 )
@@ -116,8 +117,8 @@ func TestClient_WAFs(t *testing.T) {
 	var wafs []*WAF
 	record(t, fixtureBase+"/list", func(c *Client) {
 		wafs, err = c.ListWAFs(&ListWAFsInput{
-			Service: testService.ID,
-			Version: strconv.Itoa(tv.Number),
+			FilterService: testService.ID,
+			FilterVersion: tv.Number,
 		})
 	})
 	if err != nil {
@@ -208,24 +209,6 @@ func TestClient_WAFs(t *testing.T) {
 
 }
 
-func TestClient_ListWAFs_validation(t *testing.T) {
-	var err error
-	_, err = testClient.ListWAFs(&ListWAFsInput{
-		Service: "",
-	})
-	if err != ErrMissingService {
-		t.Errorf("bad error: %s", err)
-	}
-
-	_, err = testClient.ListWAFs(&ListWAFsInput{
-		Service: "foo",
-		Version: "",
-	})
-	if err != ErrMissingVersion {
-		t.Errorf("bad error: %s", err)
-	}
-}
-
 func TestClient_CreateWAF_validation(t *testing.T) {
 	var err error
 	_, err = testClient.CreateWAF(&WAFInput{
@@ -312,6 +295,46 @@ func TestClient_DeleteWAF_validation(t *testing.T) {
 	})
 	if err != ErrMissingWAFID {
 		t.Errorf("bad error: %s", err)
+	}
+}
+
+func TestClient_listWAFs_formatFilters(t *testing.T) {
+	cases := []struct {
+		remote *ListWAFsInput
+		local  map[string]string
+	}{
+		{
+			remote: &ListWAFsInput{
+				FilterService: "service1",
+				FilterVersion: 1,
+			},
+			local: map[string]string{
+				"filter[service_id]":             "service1",
+				"filter[service_version_number]": "1",
+			},
+		},
+		{
+			remote: &ListWAFsInput{
+				FilterService: "service1",
+				FilterVersion: 1,
+				PageSize:      2,
+				PageNumber:    2,
+				Include:       "included",
+			},
+			local: map[string]string{
+				"filter[service_id]":             "service1",
+				"filter[service_version_number]": "1",
+				"page[size]":                     "2",
+				"page[number]":                   "2",
+				"include":                        "included",
+			},
+		},
+	}
+	for _, c := range cases {
+		out := c.remote.formatFilters()
+		if !reflect.DeepEqual(out, c.local) {
+			t.Fatalf("Error matching:\nexpected: %#v\n     got: %#v", c.local, out)
+		}
 	}
 }
 

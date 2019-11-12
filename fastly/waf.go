@@ -45,29 +45,50 @@ var wafType = reflect.TypeOf(new(WAF))
 
 // ListWAFsInput is used as input to the ListWAFs function.
 type ListWAFsInput struct {
-	// Service is the ID of the service (required).
-	Service string
+	// Limit the number of returned firewalls.
+	PageSize int
+	// Request a specific page of firewalls.
+	PageNumber int
+	// Specify the service ID of the returned firewalls.
+	FilterService string
+	// Specify the version of the service for the firewalls.
+	FilterVersion int
+    // Include relationships. Optional, comma-separated values. Permitted values: waf_firewall_versions.
+	Include string 
+}
 
-	// Version is the specific configuration version (required).
-	Version string
+func (i *ListWAFsInput) formatFilters() map[string]string {
+
+	result := map[string]string{}
+	pairings := map[string]interface{}{
+		"page[size]":                     i.PageSize,
+		"page[number]":                   i.PageNumber,
+		"filter[service_id]":             i.FilterService,
+		"filter[service_version_number]": i.FilterVersion,
+		"include":                        i.Include,
+	}
+
+	for key, value := range pairings {
+		switch t := reflect.TypeOf(value).String(); t {
+		case "string":
+			if value != "" {
+				result[key] = value.(string)
+			}
+		case "int":
+			if value != 0 {
+				result[key] = strconv.Itoa(value.(int))
+			}
+		}
+	}
+	return result
 }
 
 // ListWAFs returns the list of wafs for the configuration version.
 func (c *Client) ListWAFs(i *ListWAFsInput) ([]*WAF, error) {
-	if i.Service == "" {
-		return nil, ErrMissingService
-	}
-
-	if i.Version == "" {
-		return nil, ErrMissingVersion
-	}
 
 	path := fmt.Sprint("/waf/firewalls")
 	resp, err := c.Get(path, &RequestOptions{
-		Params: map[string]string{
-			"filter[service_id]":             i.Service,
-			"filter[service_version_number]": i.Version,
-		},
+		Params: i.formatFilters(),
 	})
 	if err != nil {
 		return nil, err
