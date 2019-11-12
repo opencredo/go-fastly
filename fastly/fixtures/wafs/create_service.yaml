@@ -12,11 +12,11 @@ interactions:
       Content-Type:
       - application/x-www-form-urlencoded
       User-Agent:
-      - FastlyGo/1.3.0 (+github.com/fastly/go-fastly; go1.13.3)
+      - FastlyGo/1.3.0 (+github.com/fastly/go-fastly; go1.13.4)
     url: https://api.fastly.com/service
     method: POST
   response:
-    body: '{"customer_id":"WpqWFjTA4lk2N1g0GY2HH","comment":"go-fastly client test","name":"test_service_service","versions":[{"comment":"","staging":false,"number":1,"deleted_at":null,"active":false,"created_at":"2019-11-11T09:47:08Z","testing":false,"service_id":"3hn15tWwwLhD47TJAYqj3C","updated_at":"2019-11-11T09:47:08Z","deployed":false,"locked":false}],"publish_key":"fe546bc09e3ec8138425eb0c34d57454f2c65b13","created_at":"2019-11-11T09:47:08Z","deleted_at":null,"type":"vcl","id":"3hn15tWwwLhD47TJAYqj3C","updated_at":"2019-11-11T09:47:08Z"}'
+    body: '{"customer_id":"WpqWFjTA4lk2N1g0GY2HH","comment":"go-fastly client test","name":"test_service_service","publish_key":"3b94816c86b3a740fe97cbfa2c1f24d00a3317d8","deleted_at":null,"created_at":"2019-11-12T16:10:20Z","updated_at":"2019-11-12T16:10:20Z","id":"6gkEdARZ3mPzhQvdi2YH3j","type":"vcl","versions":[{"service_id":"6gkEdARZ3mPzhQvdi2YH3j","deployed":false,"staging":false,"active":false,"updated_at":"2019-11-12T16:10:20Z","created_at":"2019-11-12T16:10:20Z","locked":false,"deleted_at":null,"testing":false,"number":1,"comment":""}]}'
     headers:
       Accept-Ranges:
       - bytes
@@ -25,11 +25,11 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Mon, 11 Nov 2019 09:47:08 GMT
+      - Tue, 12 Nov 2019 16:10:20 GMT
       Fastly-Ratelimit-Remaining:
-      - "999"
+      - "977"
       Fastly-Ratelimit-Reset:
-      - "1573466400"
+      - "1573578000"
       Status:
       - 200 OK
       Strict-Transport-Security:
@@ -43,9 +43,9 @@ interactions:
       X-Cache-Hits:
       - 0, 0
       X-Served-By:
-      - cache-control-slwdc9035-CONTROL-SLWDC, cache-lcy19247-LCY
+      - cache-control-slwdc9035-CONTROL-SLWDC, cache-lcy19279-LCY
       X-Timer:
-      - S1573465628.949339,VS0,VE275
+      - S1573575020.114176,VS0,VE526
     status: 200 OK
     code: 200
     duration: ""

@@ -270,60 +270,50 @@ func TestClient_GetWAF_validation(t *testing.T) {
 	}
 }
 
-//
-// func TestClient_UpdateWAF_validation(t *testing.T) {
-// 	var err error
-// 	_, err = testClient.UpdateWAF(&UpdateWAFInput{
-// 		Service: "",
-// 	})
-// 	if err != ErrMissingService {
-// 		t.Errorf("bad error: %s", err)
-// 	}
-//
-// 	_, err = testClient.UpdateWAF(&UpdateWAFInput{
-// 		Service: "foo",
-// 		Version: 0,
-// 	})
-// 	if err != ErrMissingVersion {
-// 		t.Errorf("bad error: %s", err)
-// 	}
-//
-// 	_, err = testClient.UpdateWAF(&UpdateWAFInput{
-// 		Service: "foo",
-// 		Version: 1,
-// 		WAFID:   "",
-// 	})
-// 	if err != ErrMissingWAFID {
-// 		t.Errorf("bad error: %s", err)
-// 	}
-// }
-//
-// func TestClient_DeleteWAF_validation(t *testing.T) {
-// 	var err error
-// 	err = testClient.DeleteWAF(&DeleteWAFInput{
-// 		Service: "",
-// 	})
-// 	if err != ErrMissingService {
-// 		t.Errorf("bad error: %s", err)
-// 	}
-//
-// 	err = testClient.DeleteWAF(&DeleteWAFInput{
-// 		Service: "foo",
-// 		Version: 0,
-// 	})
-// 	if err != ErrMissingVersion {
-// 		t.Errorf("bad error: %s", err)
-// 	}
-//
-// 	err = testClient.DeleteWAF(&DeleteWAFInput{
-// 		Service: "foo",
-// 		Version: 1,
-// 		WAFID:   "",
-// 	})
-// 	if err != ErrMissingWAFID {
-// 		t.Errorf("bad error: %s", err)
-// 	}
-// }
+func TestClient_UpdateWAF_validation(t *testing.T) {
+	var err error
+	_, err = testClient.UpdateWAF(&WAFInput{
+		Service: "",
+	})
+	if err != ErrMissingService {
+		t.Errorf("bad error: %s", err)
+	}
+
+	_, err = testClient.UpdateWAF(&WAFInput{
+		Service: "foo",
+		Version: "",
+	})
+	if err != ErrMissingVersion {
+		t.Errorf("bad error: %s", err)
+	}
+
+	_, err = testClient.UpdateWAF(&WAFInput{
+		Service: "foo",
+		Version: "1",
+		ID:      "",
+	})
+	if err != ErrMissingWAFID {
+		t.Errorf("bad error: %s", err)
+	}
+}
+
+func TestClient_DeleteWAF_validation(t *testing.T) {
+	var err error
+	err = testClient.DeleteWAF(&DeleteWAFInput{
+		Version: "",
+	})
+	if err != ErrMissingVersion {
+		t.Errorf("bad error: %s", err)
+	}
+
+	err = testClient.DeleteWAF(&DeleteWAFInput{
+		Version: "1",
+		ID:      "",
+	})
+	if err != ErrMissingWAFID {
+		t.Errorf("bad error: %s", err)
+	}
+}
 
 func TestUpdateWAFRuleStatusesInput_validate(t *testing.T) {
 	tests := []struct {
