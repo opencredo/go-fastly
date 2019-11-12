@@ -327,6 +327,7 @@ func (c *Client) DeleteWAF(i *DeleteWAFInput) error {
 
 ////////////// VERSIONS ///////////////
 
+// WAFVersion the waf configuration object
 type WAFVersion struct {
 	ID                               string `jsonapi:"primary,waf_firewall_version"`
 	Number                           int    `jsonapi:"attr,number"`
@@ -374,9 +375,10 @@ type WAFVersion struct {
 }
 
 type ListWAFVersionsInput struct {
-	ID string
+	ID     string
 	Number int
 }
+
 // ListWAFVersions returns the list of waf versions for a waf.
 func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) ([]*WAFVersion, error) {
 	if i.ID == "" {

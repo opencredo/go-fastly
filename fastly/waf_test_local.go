@@ -9,7 +9,7 @@ import (
 
 
 
-firewallID := "3uLHP6bclZHnpPITBNoWDN"
+var firewallID = "3uLHP6bclZHnpPITBNoWDN"
 
 
 
