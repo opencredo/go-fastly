@@ -65,7 +65,8 @@ func (c *Client) ListWAFs(i *ListWAFsInput) ([]*WAF, error) {
 	path := fmt.Sprint("/waf/firewalls")
 	resp, err := c.Get(path, &RequestOptions{
 		Params: map[string]string{
-			"filter[service_id]": i.Service,
+			"filter[service_id]":             i.Service,
+			"filter[service_version_number]": i.Version,
 		},
 	})
 	if err != nil {
@@ -328,7 +329,7 @@ func (c *Client) GetOWASP(i *GetOWASPInput) (*OWASP, error) {
 	if i.Service == "" {
 		return nil, ErrMissingService
 	}
-	
+
 	if i.ID == "" {
 		return nil, ErrMissingWAFID
 	}
