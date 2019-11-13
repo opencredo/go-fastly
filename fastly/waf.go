@@ -39,6 +39,11 @@ type WAF struct {
 	ActiveRulesOWASPScoreCount     int        `jsonapi:"attr,active_rules_owasp_score_count"`
 }
 
+type WAFResponse struct {
+	Links paginationInfo
+	Items []*WAF
+}
+
 // wafType is used for reflection because JSONAPI wants to know what it's
 // decoding into.
 var wafType = reflect.TypeOf(new(WAF))
@@ -53,8 +58,8 @@ type ListWAFsInput struct {
 	FilterService string
 	// Specify the version of the service for the firewalls.
 	FilterVersion int
-    // Include relationships. Optional, comma-separated values. Permitted values: waf_firewall_versions.
-	Include string 
+	// Include relationships. Optional, comma-separated values. Permitted values: waf_firewall_versions.
+	Include string
 }
 
 func (i *ListWAFsInput) formatFilters() map[string]string {
@@ -84,7 +89,7 @@ func (i *ListWAFsInput) formatFilters() map[string]string {
 }
 
 // ListWAFs returns the list of wafs for the configuration version.
-func (c *Client) ListWAFs(i *ListWAFsInput) ([]*WAF, error) {
+func (c *Client) ListWAFs(i *ListWAFsInput) (*WAFResponse, error) {
 
 	path := fmt.Sprint("/waf/firewalls")
 	resp, err := c.Get(path, &RequestOptions{
@@ -94,7 +99,12 @@ func (c *Client) ListWAFs(i *ListWAFsInput) ([]*WAF, error) {
 		return nil, err
 	}
 
-	data, err := jsonapi.UnmarshalManyPayload(resp.Body, wafType)
+	pages, body, err := getPages(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := jsonapi.UnmarshalManyPayload(body, wafType)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +117,11 @@ func (c *Client) ListWAFs(i *ListWAFsInput) ([]*WAF, error) {
 		}
 		wafs[i] = typed
 	}
-	return wafs, nil
+
+	return &WAFResponse{
+		Links: pages,
+		Items: wafs,
+	}, nil
 }
 
 // WAFInput is used as input to the CreateWAF and UpdateWAF function.

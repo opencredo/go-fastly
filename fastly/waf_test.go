@@ -114,9 +114,9 @@ func TestClient_WAFs(t *testing.T) {
 	}
 
 	// List
-	var wafs []*WAF
+	var wafsResp *WAFResponse
 	record(t, fixtureBase+"/list", func(c *Client) {
-		wafs, err = c.ListWAFs(&ListWAFsInput{
+		wafsResp, err = c.ListWAFs(&ListWAFsInput{
 			FilterService: testService.ID,
 			FilterVersion: tv.Number,
 		})
@@ -124,8 +124,8 @@ func TestClient_WAFs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(wafs) < 0 {
-		t.Errorf("bad wafs: %v", wafs)
+	if len(wafsResp.Items) < 0 {
+		t.Errorf("bad wafs: %v", wafsResp.Items)
 	}
 
 	// Ensure deleted
