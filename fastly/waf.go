@@ -123,7 +123,7 @@ func (c *Client) ListWAFs(i *ListWAFsInput) (*WAFResponse, error) {
 	}, nil
 }
 
-// CreateWAFInput is used as input to the CreateWAF and UpdateWAF function.
+// CreateWAFInput is used as input to the CreateWAF function.
 type CreateWAFInput struct {
 	// Service is the ID of the service. Version is the specific configuration
 	// version. Both fields are required.
@@ -198,7 +198,7 @@ func (c *Client) GetWAF(i *GetWAFInput) (*WAF, error) {
 	return &waf, nil
 }
 
-// UpdateWAFInput is used as input to the CreateWAF and UpdateWAF function.
+// UpdateWAFInput is used as input to the UpdateWAF function.
 type UpdateWAFInput struct {
 	// Service is the ID of the service. Version is the specific configuration
 	// version. Both fields are required.
