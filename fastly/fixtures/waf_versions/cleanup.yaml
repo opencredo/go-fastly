@@ -1,0 +1,44 @@
+---
+version: 1
+interactions:
+- request:
+    body: |
+      {"data":{"type":"waf_firewall","id":"3Pri3aDcddvnzkcAk02sV0","attributes":{"service_version_number":"2"}}}
+    form: {}
+    headers:
+      Accept:
+      - application/vnd.api+json
+      Content-Type:
+      - application/vnd.api+json
+      User-Agent:
+      - FastlyGo/1.3.0 (+github.com/fastly/go-fastly; go1.13.4)
+    url: https://api.fastly.com/waf/firewalls/3Pri3aDcddvnzkcAk02sV0
+    method: DELETE
+  response:
+    body: ""
+    headers:
+      Accept-Ranges:
+      - bytes
+      - bytes
+      Date:
+      - Wed, 13 Nov 2019 16:13:25 GMT
+      Status:
+      - 204 No Content
+      Strict-Transport-Security:
+      - max-age=31536000
+      Via:
+      - 1.1 varnish
+      - 1.1 varnish
+      X-Cache:
+      - MISS, MISS
+      X-Cache-Hits:
+      - 0, 0
+      X-Content-Type-Options:
+      - nosniff
+      X-Served-By:
+      - cache-control-slwdc9036-CONTROL-SLWDC, cache-lcy19272-LCY
+      X-Timer:
+      - S1573661605.032524,VS0,VE368
+    status: 204 No Content
+    code: 204
+    duration: ""

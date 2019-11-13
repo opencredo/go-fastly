@@ -206,7 +206,6 @@ func TestClient_WAFs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 }
 
 func TestClient_CreateWAF_validation(t *testing.T) {

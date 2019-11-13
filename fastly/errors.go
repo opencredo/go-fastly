@@ -101,6 +101,10 @@ var ErrMissingWAFID = errors.New("Missing required field 'WAFID'")
 // requires a "WafID" key, but one was not set
 var ErrMissingWAFNumber = errors.New("Missing required field 'Number'")
 
+// ErrMissingWAFVersionID is an error that is returned was an input struct
+// requires a "ID" key, but one was not set
+var ErrMissingWAFVersionID = errors.New("Missing required field 'ID'")
+
 // ErrMissingOWASPID is an error that is returned was an input struct
 // requires a "OWASPID" key, but one was not set
 var ErrMissingOWASPID = errors.New("Missing required field 'OWASPID'")

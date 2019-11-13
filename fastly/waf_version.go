@@ -8,6 +8,8 @@ import (
 	"github.com/google/jsonapi"
 )
 
+var WAFVersionType = reflect.TypeOf(new(WAFVersion))
+
 type WAFVersion struct {
 	ID                               string `jsonapi:"primary,waf_firewall_version"`
 	Number                           int    `jsonapi:"attr,number"`
@@ -54,6 +56,11 @@ type WAFVersion struct {
 	ActiveRulesOWASPBlockCount       int    `jsonapi:"attr,active_rules_owasp_block_count"`
 }
 
+type WAFVersionResponse struct {
+	Items []*WAFVersion
+	Info infoResponse
+}
+
 type ListWAFVersionsInput struct {
 	// The firewall id
 	WAFID string
@@ -89,7 +96,7 @@ func (i *ListWAFVersionsInput) formatFilters() map[string]string {
 	return result
 }
 
-func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) ([]*WAFVersion, error) {
+func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, error) {
 	
 	if i.WAFID == "" {
 		return nil, ErrMissingWAFID
@@ -103,18 +110,200 @@ func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) ([]*WAFVersion, error)
 		return nil, err
 	}
 
-	data, err := jsonapi.UnmarshalManyPayload(resp.Body, wafType)
+	info, body, err := getInfo(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	wafs := make([]*WAFVersion, len(data))
+	data, err := jsonapi.UnmarshalManyPayload(body, WAFVersionType)
+	if err != nil {
+		return nil, err
+	}
+
+	wafVersions := make([]*WAFVersion, len(data))
 	for i := range data {
 		typed, ok := data[i].(*WAFVersion)
 		if !ok {
 			return nil, fmt.Errorf("got back a non-WAFVersion response")
 		}
-		wafs[i] = typed
+		wafVersions[i] = typed
 	}
-	return wafs, nil
+	return &WAFVersionResponse{
+		Items: wafVersions,
+		Info:  info,
+	}, nil
+}
+
+type GetWAFVersionInput struct {
+	// The firewall id
+	WAFID string
+	// the firewall version (number)
+	WAFVersion int
+}
+
+// GetWAFVersion GetWAFVersion details for given WAF version
+func (c *Client) GetWAFVersion(i *GetWAFVersionInput) (*WAFVersion, error) {
+
+	if i.WAFID == "" {
+		return nil, ErrMissingWAFID
+	}
+
+	if i.WAFVersion == 0 {
+		return nil, ErrMissingWAFNumber
+	}
+
+	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d", i.WAFID, i.WAFVersion)
+	resp, err := c.Get(path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var wafVer WAFVersion
+	if err := jsonapi.UnmarshalPayload(resp.Body, &wafVer); err != nil {
+		return nil, err
+	}
+	return &wafVer, nil
+}
+
+
+// UpdateWAFInput is used as input to the UpdateWAFVersion function.
+type UpdateWAFVersionInput struct {
+	WAFID             				 string
+	WAFVersion                       int
+	ID                               string `jsonapi:"primary,waf_firewall"`
+	AllowedHTTPVersions              string `jsonapi:"attr,allowed_http_versions,omitempty"`
+	AllowedMethods                   string `jsonapi:"attr,allowed_methods,omitempty"`
+	AllowedRequestContentType        string `jsonapi:"attr,allowed_request_content_type,omitempty"`
+	AllowedRequestContentTypeCharset string `jsonapi:"attr,allowed_request_content_type_charset,omitempty"`
+	HighRiskCountryCodes             string `jsonapi:"attr,high_risk_country_codes,omitempty"`
+	RestrictedExtensions             string `jsonapi:"attr,restricted_extensions,omitempty"`
+	RestrictedHeaders                string `jsonapi:"attr,restricted_headers,omitempty"`
+	ArgLength                        int    `jsonapi:"attr,arg_length,omitempty"`
+	ArgNameLength                    int    `jsonapi:"attr,arg_name_length,omitempty"`
+	CombinedFileSizes                int    `jsonapi:"attr,combined_file_sizes,omitempty"`
+	CriticalAnomalyScore             int    `jsonapi:"attr,critical_anomaly_score,omitempty"`
+	ErrorAnomalyScore                int    `jsonapi:"attr,error_anomaly_score,omitempty"`
+	HTTPViolationScoreThreshold      int    `jsonapi:"attr,http_violation_score_threshold,omitempty"`
+	InboundAnomalyScoreThreshold     int    `jsonapi:"attr,inbound_anomaly_score_threshold,omitempty"`
+	LFIScoreThreshold                int    `jsonapi:"attr,lfi_score_threshold,omitempty"`
+	MaxFileSize                      int    `jsonapi:"attr,max_file_size,omitempty"`
+	MaxNumArgs                       int    `jsonapi:"attr,max_num_args,omitempty"`
+	NoticeAnomalyScore               int    `jsonapi:"attr,notice_anomaly_score,omitempty"`
+	ParanoiaLevel                    int    `jsonapi:"attr,paranoia_level,omitempty"`
+	PHPInjectionScoreThreshold       int    `jsonapi:"attr,php_injection_score_threshold,omitempty"`
+	RCEScoreThreshold                int    `jsonapi:"attr,rce_score_threshold,omitempty"`
+	RFIScoreThreshold                int    `jsonapi:"attr,rfi_score_threshold,omitempty"`
+	SessionFixationScoreThreshold    int    `jsonapi:"attr,session_fixation_score_threshold,omitempty"`
+	SQLInjectionScoreThreshold       int    `jsonapi:"attr,sql_injection_score_threshold,omitempty"`
+	TotalArgLength                   int    `jsonapi:"attr,total_arg_length,omitempty"`
+	WarningAnomalyScore              int    `jsonapi:"attr,warning_anomaly_score,omitempty"`
+	XSSScoreThreshold                int    `jsonapi:"attr,xss_score_threshold,omitempty"`
+}
+
+// UpdateWAF updates a specific WAF.
+func (c *Client) UpdateWAFVersion(i *UpdateWAFVersionInput) (*WAFVersion, error) {
+	if i.WAFID == "" {
+		return nil, ErrMissingWAFID
+	}
+
+	if i.WAFVersion == 0 {
+		return nil, ErrMissingWAFNumber
+	}
+
+	if i.ID == "" {
+		return nil, ErrMissingWAFVersionID
+	}
+
+	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d", i.WAFID, i.WAFVersion)
+	resp, err := c.PatchJSONAPI(path, i, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var waf WAFVersion
+	if err := jsonapi.UnmarshalPayload(resp.Body, &waf); err != nil {
+		return nil, err
+	}
+	return &waf, nil
+}
+
+// LockWAFVersionInput used as input for locking a WAF version
+type LockWAFVersionInput struct {
+	WAFID      string
+	WAFVersion int
+}
+// LockWAFVersion locks a specific WAF version.
+func (c *Client) LockWAFVersion(i *LockWAFVersionInput) (*WAFVersion, error) {
+	if i.WAFID == "" {
+		return nil, ErrMissingWAFID
+	}
+
+	if i.WAFVersion == 0 {
+		return nil, ErrMissingWAFNumber
+	}
+
+	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d/lock", i.WAFID, i.WAFVersion)
+	resp, err := c.PutJSONAPI(path, &LockWAFVersionInput{} , nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var waf WAFVersion
+	if err := jsonapi.UnmarshalPayload(resp.Body, &waf); err != nil {
+		return nil, err
+	}
+	return &waf, nil
+}
+
+// CloneWAFVersionInput used as input for cloning a WAF version
+type CloneWAFVersionInput struct {
+	WAFID      string
+	WAFVersion int
+}
+// CloneWAFVersion clones a specific WAF version.
+func (c *Client) CloneWAFVersion(i *CloneWAFVersionInput) (*WAFVersion, error) {
+	if i.WAFID == "" {
+		return nil, ErrMissingWAFID
+	}
+
+	if i.WAFVersion == 0 {
+		return nil, ErrMissingWAFNumber
+	}
+
+	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d/clone", i.WAFID, i.WAFVersion)
+	resp, err := c.PutJSONAPI(path, &CloneWAFVersionInput{}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var waf WAFVersion
+	if err := jsonapi.UnmarshalPayload(resp.Body, &waf); err != nil {
+		return nil, err
+	}
+	return &waf, nil
+}
+
+// DeployWAFVersionInput used as input for deploying a WAF version
+type DeployWAFVersionInput struct {
+	WAFID      string
+	WAFVersion int
+}
+
+// DeployWAFVersion deploys a specific WAF version.
+func (c *Client) DeployWAFVersion(i *DeployWAFVersionInput) error {
+
+	if i.WAFID == "" {
+		return ErrMissingWAFID
+	}
+
+	if i.WAFVersion == 0 {
+		return ErrMissingWAFNumber
+	}
+
+	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d", i.WAFID, i.WAFVersion)
+	_, err := c.PostJSONAPI(path, &DeployWAFVersionInput{}, nil)
+	if err != nil {
+		return err
+	}
+	return nil
 }
