@@ -39,9 +39,10 @@ type WAF struct {
 	ActiveRulesOWASPScoreCount     int        `jsonapi:"attr,active_rules_owasp_score_count"`
 }
 
+// WAFResponse th eobject containing the list of waf results
 type WAFResponse struct {
-	Links paginationInfo
 	Items []*WAF
+	Info  infoResponse
 }
 
 // wafType is used for reflection because JSONAPI wants to know what it's
@@ -98,12 +99,10 @@ func (c *Client) ListWAFs(i *ListWAFsInput) (*WAFResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	pages, body, err := getPages(resp.Body)
+	info, body, err := getInfo(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-
 	data, err := jsonapi.UnmarshalManyPayload(body, wafType)
 	if err != nil {
 		return nil, err
@@ -119,13 +118,13 @@ func (c *Client) ListWAFs(i *ListWAFsInput) (*WAFResponse, error) {
 	}
 
 	return &WAFResponse{
-		Links: pages,
 		Items: wafs,
+		Info:  info,
 	}, nil
 }
 
-// WAFInput is used as input to the CreateWAF and UpdateWAF function.
-type WAFInput struct {
+// CreateWAFInput is used as input to the CreateWAF and UpdateWAF function.
+type CreateWAFInput struct {
 	// Service is the ID of the service. Version is the specific configuration
 	// version. Both fields are required.
 	ID                string `jsonapi:"primary,waf_firewall"`
@@ -136,7 +135,7 @@ type WAFInput struct {
 }
 
 // CreateWAF creates a new Fastly WAF.
-func (c *Client) CreateWAF(i *WAFInput) (*WAF, error) {
+func (c *Client) CreateWAF(i *CreateWAFInput) (*WAF, error) {
 	if i.Service == "" {
 		return nil, ErrMissingService
 	}
@@ -199,8 +198,19 @@ func (c *Client) GetWAF(i *GetWAFInput) (*WAF, error) {
 	return &waf, nil
 }
 
+// UpdateWAFInput is used as input to the CreateWAF and UpdateWAF function.
+type UpdateWAFInput struct {
+	// Service is the ID of the service. Version is the specific configuration
+	// version. Both fields are required.
+	ID                string `jsonapi:"primary,waf_firewall"`
+	Service           string `jsonapi:"attr,service_id"`
+	Version           string `jsonapi:"attr,service_version_number"`
+	PrefetchCondition string `jsonapi:"attr,prefetch_condition"`
+	Response          string `jsonapi:"attr,response"`
+}
+
 // UpdateWAF updates a specific WAF.
-func (c *Client) UpdateWAF(i *WAFInput) (*WAF, error) {
+func (c *Client) UpdateWAF(i *UpdateWAFInput) (*WAF, error) {
 	if i.Service == "" {
 		return nil, ErrMissingService
 	}
@@ -234,7 +244,7 @@ func (c *Client) EnableWAF(id string) error {
 	}
 
 	path := fmt.Sprintf("/waf/firewalls/%s/enable", id)
-	resp, err := c.PatchJSONAPI(path, &WAFInput{}, nil)
+	resp, err := c.PatchJSONAPI(path, &UpdateWAFInput{}, nil)
 	if err != nil {
 		return err
 	}
@@ -254,7 +264,7 @@ func (c *Client) DisableWAF(id string) error {
 	}
 
 	path := fmt.Sprintf("/waf/firewalls/%s/disable", id)
-	resp, err := c.PatchJSONAPI(path, &WAFInput{}, nil)
+	resp, err := c.PatchJSONAPI(path, &UpdateWAFInput{}, nil)
 	if err != nil {
 		return err
 	}
@@ -821,6 +831,11 @@ type linksResponse struct {
 	Links paginationInfo `json:"links"`
 }
 
+type infoResponse struct {
+	Links paginationInfo `json:"links"`
+	Meta  metaInfo       `json:"meta"`
+}
+
 // paginationInfo stores links to searches related to the current one, showing
 // any information about additional results being stored on another page
 type paginationInfo struct {
@@ -832,6 +847,13 @@ type paginationInfo struct {
 // GetWAFRuleStatusesResponse is the data returned to the user from a GetWAFRuleStatus call
 type GetWAFRuleStatusesResponse struct {
 	Rules []*WAFRuleStatus
+}
+
+type metaInfo struct {
+	CurrentPage int `json:"current_page,omitempty"`
+	PerPage     int `json:"per_page,omitempty"`
+	RecordCount int `json:"record_count,omitempty"`
+	TotalPages  int `json:"total_pages,omitempty"`
 }
 
 // getPages parses a response to get the pagination data without destroying
@@ -849,6 +871,20 @@ func getPages(body io.Reader) (paginationInfo, io.Reader, error) {
 	var pages linksResponse
 	json.Unmarshal(bodyBytes, &pages)
 	return pages.Links, bytes.NewReader(buf.Bytes()), nil
+}
+
+func getInfo(body io.Reader) (infoResponse, io.Reader, error) {
+	var buf bytes.Buffer
+	tee := io.TeeReader(body, &buf)
+
+	bodyBytes, err := ioutil.ReadAll(tee)
+	if err != nil {
+		return infoResponse{}, nil, err
+	}
+
+	var info infoResponse
+	json.Unmarshal(bodyBytes, &info)
+	return info, bytes.NewReader(buf.Bytes()), nil
 }
 
 // GetWAFRuleStatusInput specifies the parameters for the GetWAFRuleStatus call.

@@ -102,7 +102,7 @@ func TestClient_WAFs(t *testing.T) {
 	// Create
 	var waf *WAF
 	record(t, fixtureBase+"/create", func(c *Client) {
-		waf, err = c.CreateWAF(&WAFInput{
+		waf, err = c.CreateWAF(&CreateWAFInput{
 			Service:           testService.ID,
 			Version:           strconv.Itoa(tv.Number),
 			PrefetchCondition: condition.Name,
@@ -182,7 +182,7 @@ func TestClient_WAFs(t *testing.T) {
 	}()
 	var uwaf *WAF
 	record(t, fixtureBase+"/update", func(c *Client) {
-		uwaf, err = c.UpdateWAF(&WAFInput{
+		uwaf, err = c.UpdateWAF(&UpdateWAFInput{
 			Service:  testService.ID,
 			Version:  strconv.Itoa(tv.Number),
 			ID:       waf.ID,
@@ -211,14 +211,14 @@ func TestClient_WAFs(t *testing.T) {
 
 func TestClient_CreateWAF_validation(t *testing.T) {
 	var err error
-	_, err = testClient.CreateWAF(&WAFInput{
+	_, err = testClient.CreateWAF(&CreateWAFInput{
 		Service: "",
 	})
 	if err != ErrMissingService {
 		t.Errorf("bad error: %s", err)
 	}
 
-	_, err = testClient.CreateWAF(&WAFInput{
+	_, err = testClient.CreateWAF(&CreateWAFInput{
 		Service: "foo",
 		Version: "",
 	})
@@ -255,14 +255,14 @@ func TestClient_GetWAF_validation(t *testing.T) {
 
 func TestClient_UpdateWAF_validation(t *testing.T) {
 	var err error
-	_, err = testClient.UpdateWAF(&WAFInput{
+	_, err = testClient.UpdateWAF(&UpdateWAFInput{
 		Service: "",
 	})
 	if err != ErrMissingService {
 		t.Errorf("bad error: %s", err)
 	}
 
-	_, err = testClient.UpdateWAF(&WAFInput{
+	_, err = testClient.UpdateWAF(&UpdateWAFInput{
 		Service: "foo",
 		Version: "",
 	})
@@ -270,7 +270,7 @@ func TestClient_UpdateWAF_validation(t *testing.T) {
 		t.Errorf("bad error: %s", err)
 	}
 
-	_, err = testClient.UpdateWAF(&WAFInput{
+	_, err = testClient.UpdateWAF(&UpdateWAFInput{
 		Service: "foo",
 		Version: "1",
 		ID:      "",

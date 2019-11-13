@@ -190,7 +190,7 @@ func (c *Client) Delete(p string, ro *RequestOptions) (*http.Response, error) {
 	return c.Request("DELETE", p, ro)
 }
 
-// DeleteNew issues an HTTP DELETE request.
+// DeleteJSON issues an HTTP DELETE request.
 func (c *Client) DeleteJSON(p string, i interface{}, ro *RequestOptions) (*http.Response, error) {
 	return c.RequestJSONAPI("DELETE", p, i, ro)
 }
