@@ -831,6 +831,7 @@ type linksResponse struct {
 	Links paginationInfo `json:"links"`
 }
 
+// infoResponse used to pull the links and meta from the result
 type infoResponse struct {
 	Links paginationInfo `json:"links"`
 	Meta  metaInfo       `json:"meta"`
@@ -849,6 +850,7 @@ type GetWAFRuleStatusesResponse struct {
 	Rules []*WAFRuleStatus
 }
 
+// metaInfo stores information about the result returned by the server
 type metaInfo struct {
 	CurrentPage int `json:"current_page,omitempty"`
 	PerPage     int `json:"per_page,omitempty"`
