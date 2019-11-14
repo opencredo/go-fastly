@@ -92,8 +92,7 @@ func (i *ListWAFsInput) formatFilters() map[string]string {
 // ListWAFs returns the list of wafs for the configuration version.
 func (c *Client) ListWAFs(i *ListWAFsInput) (*WAFResponse, error) {
 
-	path := fmt.Sprint("/waf/firewalls")
-	resp, err := c.Get(path, &RequestOptions{
+	resp, err := c.Get("/waf/firewalls", &RequestOptions{
 		Params: i.formatFilters(),
 	})
 	if err != nil {
@@ -885,7 +884,9 @@ func getInfo(body io.Reader) (infoResponse, io.Reader, error) {
 	}
 
 	var info infoResponse
-	json.Unmarshal(bodyBytes, &info)
+	if err := json.Unmarshal(bodyBytes, &info); err != nil {
+		return infoResponse{}, nil, err
+	}
 	return info, bytes.NewReader(buf.Bytes()), nil
 }
 
