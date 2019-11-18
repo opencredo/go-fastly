@@ -3,7 +3,7 @@ version: 1
 interactions:
 - request:
     body: |
-      {"data":{"type":"waf_firewall","attributes":{"prefetch_condition":"WAF_Prefetch","response":"WAf_Response","service_id":"0WUkvsEaykUtRcqM4kHQnX","service_version_number":"2"}}}
+      {"data":{"type":"waf_firewall","attributes":{"prefetch_condition":"WAF_Prefetch","response":"WAf_Response","service_id":"2hoCOKoRmmQnHc2mYL4bpH","service_version_number":"2"}}}
     form: {}
     headers:
       Accept:
@@ -15,23 +15,21 @@ interactions:
     url: https://api.fastly.com/waf/firewalls
     method: POST
   response:
-    body: '{"data":{"id":"3Pri3aDcddvnzkcAk02sV0","type":"waf_firewall","attributes":{"service_id":"0WUkvsEaykUtRcqM4kHQnX","prefetch_condition":"WAF_Prefetch","response":"WAf_Response","disabled":false,"service_version_number":2,"created_at":"2019-11-13T16:13:23Z","updated_at":"2019-11-13T16:13:23Z","active_rules_trustwave_log_count":0,"active_rules_trustwave_block_count":0,"active_rules_fastly_log_count":0,"active_rules_fastly_block_count":0,"active_rules_owasp_log_count":0,"active_rules_owasp_block_count":0,"active_rules_owasp_score_count":0}}}'
+    body: '{"data":{"id":"4c7Q5WrMXaJzo3I0jQQvxE","type":"waf_firewall","attributes":{"service_id":"2hoCOKoRmmQnHc2mYL4bpH","prefetch_condition":"WAF_Prefetch","response":"WAf_Response","disabled":false,"service_version_number":2,"created_at":"2019-11-18T11:04:10Z","updated_at":"2019-11-18T11:04:10Z","active_rules_trustwave_log_count":0,"active_rules_trustwave_block_count":0,"active_rules_fastly_log_count":0,"active_rules_fastly_block_count":0,"active_rules_owasp_log_count":0,"active_rules_owasp_block_count":0,"active_rules_owasp_score_count":0}}}'
     headers:
       Accept-Ranges:
-      - bytes
       - bytes
       Content-Length:
       - "542"
       Content-Type:
       - application/vnd.api+json
       Date:
-      - Wed, 13 Nov 2019 16:13:23 GMT
+      - Mon, 18 Nov 2019 11:04:10 GMT
       Status:
       - 201 Created
       Strict-Transport-Security:
       - max-age=31536000
       Via:
-      - 1.1 varnish
       - 1.1 varnish
       X-Cache:
       - MISS, MISS
@@ -40,9 +38,9 @@ interactions:
       X-Content-Type-Options:
       - nosniff
       X-Served-By:
-      - cache-control-slwdc9036-CONTROL-SLWDC, cache-lcy19272-LCY
+      - cache-control-slwdc9035-CONTROL-SLWDC, cache-lcy19282-LCY
       X-Timer:
-      - S1573661603.877122,VS0,VE872
+      - S1574075050.532954,VS0,VE1007
     status: 201 Created
     code: 201
     duration: ""

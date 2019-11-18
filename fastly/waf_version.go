@@ -9,8 +9,14 @@ import (
 	"github.com/google/jsonapi"
 )
 
+// WAFVersionType is used for reflection because JSONAPI wants to know what it's
+// decoding into.
 var WAFVersionType = reflect.TypeOf(new(WAFVersion))
 
+// paginationPageSize used as PageSize by the ListAllWAFVersions function
+const paginationPageSize = 20
+
+// WAFVersion is the information about a firewall version object.
 type WAFVersion struct {
 	ID                               string     `jsonapi:"primary,waf_firewall_version"`
 	Number                           int        `jsonapi:"attr,number"`
@@ -57,11 +63,13 @@ type WAFVersion struct {
 	ActiveRulesOWASPBlockCount       int        `jsonapi:"attr,active_rules_owasp_block_count"`
 }
 
+// WAFVersionResponse represents a list waf versions full response.
 type WAFVersionResponse struct {
 	Items []*WAFVersion
 	Info  infoResponse
 }
 
+// ListWAFVersionsInput used as input for listing waf versions
 type ListWAFVersionsInput struct {
 	// The firewall id
 	WAFID string
@@ -97,6 +105,7 @@ func (i *ListWAFVersionsInput) formatFilters() map[string]string {
 	return result
 }
 
+// ListWAFVersions returns the list of waf versions for a given waf id.
 func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, error) {
 
 	if i.WAFID == "" {
@@ -135,6 +144,67 @@ func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, 
 	}, nil
 }
 
+// ListWAFVersions returns the complete list of waf versions for a given waf id. It iterates through
+// all existing pages to ensure all waf versions are returned at once.
+func (c *Client) ListAllWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, error) {
+
+	if i.WAFID == "" {
+		return nil, ErrMissingWAFID
+	}
+
+	r := &WAFVersionResponse{Items: []*WAFVersion{},}
+	i.PageSize = paginationPageSize
+	i.PageNumber = 1
+	path := fmt.Sprintf("/waf/firewalls/%s/versions", i.WAFID)
+	err := c.paginateThroughLAllWAFVersions(path, i, r)
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
+func (c *Client) paginateThroughLAllWAFVersions(path string, i *ListWAFVersionsInput, r *WAFVersionResponse) error {
+
+	resp, err := c.Get(path, &RequestOptions{
+		Params: i.formatFilters(),
+	})
+	if err != nil {
+		return err
+	}
+
+	info, body, err := getInfo(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	data, err := jsonapi.UnmarshalManyPayload(body, WAFVersionType)
+	if err != nil {
+		return err
+	}
+
+	var wafVersions []*WAFVersion
+	for i := range data {
+		typed, ok := data[i].(*WAFVersion)
+		if !ok {
+			return fmt.Errorf("got back a non-WAFVersion response")
+		}
+		wafVersions = append(wafVersions, typed)
+	}
+
+	r.Items = append(r.Items, wafVersions...)
+	r.Info = info
+
+	if info.Links.Next != "" {
+		i.PageNumber = i.PageNumber+1
+		if err := c.paginateThroughLAllWAFVersions(path, i, r); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// GetWAFVersionInput used as input for GetWAFVersion function
 type GetWAFVersionInput struct {
 	// The firewall id
 	WAFID string
@@ -202,7 +272,7 @@ type UpdateWAFVersionInput struct {
 	XSSScoreThreshold                int    `jsonapi:"attr,xss_score_threshold,omitempty"`
 }
 
-// UpdateWAF updates a specific WAF.
+// UpdateWAF updates a specific WAF version.
 func (c *Client) UpdateWAFVersion(i *UpdateWAFVersionInput) (*WAFVersion, error) {
 	if i.WAFID == "" {
 		return nil, ErrMissingWAFID
