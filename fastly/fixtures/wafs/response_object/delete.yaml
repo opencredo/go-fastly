@@ -2,19 +2,15 @@
 version: 1
 interactions:
 - request:
-    body: Service=2hoCOKoRmmQnHc2mYL4bpH
-    form:
-      Service:
-      - 2hoCOKoRmmQnHc2mYL4bpH
+    body: ""
+    form: {}
     headers:
-      Content-Type:
-      - application/x-www-form-urlencoded
       User-Agent:
       - FastlyGo/1.3.0 (+github.com/fastly/go-fastly; go1.13.4)
-    url: https://api.fastly.com/service/2hoCOKoRmmQnHc2mYL4bpH/version
-    method: POST
+    url: https://api.fastly.com/service/3qt0xLYGlOxt19jpAQ0LJM/version/2/response_object/WAf_Response
+    method: DELETE
   response:
-    body: '{"service_id":"2hoCOKoRmmQnHc2mYL4bpH","number":2}'
+    body: '{"status":"ok"}'
     headers:
       Accept-Ranges:
       - bytes
@@ -23,11 +19,11 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Mon, 18 Nov 2019 11:04:08 GMT
+      - Wed, 20 Nov 2019 12:59:08 GMT
       Fastly-Ratelimit-Remaining:
-      - "989"
+      - "966"
       Fastly-Ratelimit-Reset:
-      - "1574078400"
+      - "1574254800"
       Status:
       - 200 OK
       Strict-Transport-Security:
@@ -41,9 +37,9 @@ interactions:
       X-Cache-Hits:
       - 0, 0
       X-Served-By:
-      - cache-control-slwdc9037-CONTROL-SLWDC, cache-lcy19282-LCY
+      - cache-control-slwdc9036-CONTROL-SLWDC, cache-lcy19265-LCY
       X-Timer:
-      - S1574075047.487024,VS0,VE668
+      - S1574254748.207257,VS0,VE316
     status: 200 OK
     code: 200
     duration: ""
