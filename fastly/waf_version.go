@@ -156,7 +156,7 @@ func (c *Client) ListAllWAFVersions(i *ListWAFVersionsInput) (*WAFVersionRespons
 	i.PageSize = paginationPageSize
 	i.PageNumber = 1
 	path := fmt.Sprintf("/waf/firewalls/%s/versions", i.WAFID)
-	err := c.paginateThroughLAllWAFVersions(path, i, r)
+	err := c.paginateThroughAllWAFVersions(path, i, r)
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +164,7 @@ func (c *Client) ListAllWAFVersions(i *ListWAFVersionsInput) (*WAFVersionRespons
 	return r, nil
 }
 
-func (c *Client) paginateThroughLAllWAFVersions(path string, i *ListWAFVersionsInput, r *WAFVersionResponse) error {
+func (c *Client) paginateThroughAllWAFVersions(path string, i *ListWAFVersionsInput, r *WAFVersionResponse) error {
 
 	resp, err := c.Get(path, &RequestOptions{
 		Params: i.formatFilters(),
@@ -197,7 +197,7 @@ func (c *Client) paginateThroughLAllWAFVersions(path string, i *ListWAFVersionsI
 
 	if info.Links.Next != "" {
 		i.PageNumber = i.PageNumber+1
-		if err := c.paginateThroughLAllWAFVersions(path, i, r); err != nil {
+		if err := c.paginateThroughAllWAFVersions(path, i, r); err != nil {
 			return err
 		}
 	}
