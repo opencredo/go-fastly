@@ -39,7 +39,7 @@ type WAF struct {
 	ActiveRulesOWASPScoreCount     int        `jsonapi:"attr,active_rules_owasp_score_count"`
 }
 
-// WAFResponse th eobject containing the list of waf results
+// WAFResponse an object containing the list of WAF results.
 type WAFResponse struct {
 	Items []*WAF
 	Info  infoResponse
