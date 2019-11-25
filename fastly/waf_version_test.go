@@ -29,7 +29,7 @@ func TestClient_WAF_Versions(t *testing.T) {
 
 	var err error
 	var waf *WAF
-	record(t, fixtureBase+"/create", func(c *Client) {
+	record(t, fixtureBase+"/waf/create", func(c *Client) {
 		waf, err = c.CreateWAF(&CreateWAFInput{
 			Service:           testService.ID,
 			Version:           strconv.Itoa(tv.Number),
@@ -41,7 +41,7 @@ func TestClient_WAF_Versions(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer func() {
-		record(t, fixtureBase+"/cleanup", func(c *Client) {
+		record(t, fixtureBase+"/waf/delete", func(c *Client) {
 			if err := c.DeleteWAF(&DeleteWAFInput{
 				Version: strconv.Itoa(tv.Number),
 				ID:      waf.ID,
@@ -101,14 +101,12 @@ func TestClient_WAF_Versions(t *testing.T) {
 		t.Error("expected waf, got nil")
 	}
 
-	threshold := 80
+	input := buildUpdateInput()
+	input.WAFID = waf.ID
+	input.WAFVersion = 2
+	input.ID = wafVer.ID
 	record(t, fixtureBase+"/update", func(c *Client) {
-		wafVer, err = c.UpdateWAFVersion(&UpdateWAFVersionInput{
-			WAFID:                       waf.ID,
-			WAFVersion:                  2,
-			ID:                          wafVer.ID,
-			HTTPViolationScoreThreshold: threshold,
-		})
+		wafVer, err = c.UpdateWAFVersion(input)
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -116,9 +114,7 @@ func TestClient_WAF_Versions(t *testing.T) {
 	if wafVer == nil {
 		t.Error("expected waf, got nil")
 	}
-	if wafVer.HTTPViolationScoreThreshold != threshold {
-		t.Errorf("expected %d waf: got %d", threshold, wafVer.HTTPViolationScoreThreshold)
-	}
+	verifyWAFVersionUpdate(t, input, wafVer)
 
 	record(t, fixtureBase+"/lock", func(c *Client) {
 		wafVer, err = c.LockWAFVersion(&LockWAFVersionInput{
@@ -146,6 +142,132 @@ func TestClient_WAF_Versions(t *testing.T) {
 	}
 	if len(wafVerResp.Items) != 2 {
 		t.Errorf("expected 2 waf: got %d", len(wafVerResp.Items))
+	}
+}
+
+func verifyWAFVersionUpdate(t *testing.T, i *UpdateWAFVersionInput, o *WAFVersion) {
+
+	if i.ID != o.ID {
+		t.Errorf("expected %s waf: got %s", i.ID, o.ID)
+	}
+	if i.AllowedHTTPVersions != o.AllowedHTTPVersions {
+		t.Errorf("expected %s waf: got %s", i.AllowedHTTPVersions, o.AllowedHTTPVersions)
+	}
+	if i.AllowedMethods != o.AllowedMethods {
+		t.Errorf("expected %s waf: got %s", i.AllowedMethods, o.AllowedMethods)
+	}
+	if i.AllowedRequestContentType != o.AllowedRequestContentType {
+		t.Errorf("expected %s waf: got %s", i.AllowedRequestContentType, o.AllowedRequestContentType)
+	}
+	if i.AllowedRequestContentTypeCharset != o.AllowedRequestContentTypeCharset {
+		t.Errorf("expected %s waf: got %s", i.AllowedRequestContentTypeCharset, o.AllowedRequestContentTypeCharset)
+	}
+	if i.ArgLength != o.ArgLength {
+		t.Errorf("expected %d waf: got %d", i.ArgLength, o.ArgLength)
+	}
+	if i.ArgNameLength != o.ArgNameLength {
+		t.Errorf("expected %d waf: got %d", i.ArgNameLength, o.ArgNameLength)
+	}
+	if i.CombinedFileSizes != o.CombinedFileSizes {
+		t.Errorf("expected %d waf: got %d", i.CombinedFileSizes, o.CombinedFileSizes)
+	}
+	if i.CriticalAnomalyScore != o.CriticalAnomalyScore {
+		t.Errorf("expected %d waf: got %d", i.CriticalAnomalyScore, o.CriticalAnomalyScore)
+	}
+	if i.CRSValidateUTF8Encoding != o.CRSValidateUTF8Encoding {
+		t.Errorf("expected %v waf: got %v", i.CRSValidateUTF8Encoding, o.CRSValidateUTF8Encoding)
+	}
+	if i.ErrorAnomalyScore != o.ErrorAnomalyScore {
+		t.Errorf("expected %d waf: got %d", i.ErrorAnomalyScore, o.ErrorAnomalyScore)
+	}
+	if i.HighRiskCountryCodes != o.HighRiskCountryCodes {
+		t.Errorf("expected %s waf: got %s", i.HighRiskCountryCodes, o.HighRiskCountryCodes)
+	}
+	if i.HTTPViolationScoreThreshold != o.HTTPViolationScoreThreshold {
+		t.Errorf("expected %d waf: got %d", i.HTTPViolationScoreThreshold, o.HTTPViolationScoreThreshold)
+	}
+	if i.InboundAnomalyScoreThreshold != o.InboundAnomalyScoreThreshold {
+		t.Errorf("expected %d waf: got %d", i.InboundAnomalyScoreThreshold, o.InboundAnomalyScoreThreshold)
+	}
+	if i.LFIScoreThreshold != o.LFIScoreThreshold {
+		t.Errorf("expected %d waf: got %d", i.LFIScoreThreshold, o.LFIScoreThreshold)
+	}
+	if i.MaxFileSize != o.MaxFileSize {
+		t.Errorf("expected %d waf: got %d", i.MaxFileSize, o.MaxFileSize)
+	}
+	if i.MaxNumArgs != o.MaxNumArgs {
+		t.Errorf("expected %d waf: got %d", i.MaxNumArgs, o.MaxNumArgs)
+	}
+	if i.NoticeAnomalyScore != o.NoticeAnomalyScore {
+		t.Errorf("expected %d waf: got %d", i.NoticeAnomalyScore, o.NoticeAnomalyScore)
+	}
+	if i.ParanoiaLevel != o.ParanoiaLevel {
+		t.Errorf("expected %d waf: got %d", i.ParanoiaLevel, o.ParanoiaLevel)
+	}
+	if i.PHPInjectionScoreThreshold != o.PHPInjectionScoreThreshold {
+		t.Errorf("expected %d waf: got %d", i.PHPInjectionScoreThreshold, o.PHPInjectionScoreThreshold)
+	}
+	if i.RCEScoreThreshold != o.RCEScoreThreshold {
+		t.Errorf("expected %d waf: got %d", i.RCEScoreThreshold, o.RCEScoreThreshold)
+	}
+	if i.RestrictedExtensions != o.RestrictedExtensions {
+		t.Errorf("expected %s waf: got %s", i.RestrictedExtensions, o.RestrictedExtensions)
+	}
+	if i.RestrictedHeaders != o.RestrictedHeaders {
+		t.Errorf("expected %s waf: got %s", i.RestrictedHeaders, o.RestrictedHeaders)
+	}
+	if i.RFIScoreThreshold != o.RFIScoreThreshold {
+		t.Errorf("expected %d waf: got %d", i.RFIScoreThreshold, o.RFIScoreThreshold)
+	}
+	if i.SessionFixationScoreThreshold != o.SessionFixationScoreThreshold {
+		t.Errorf("expected %d waf: got %d", i.SessionFixationScoreThreshold, o.SessionFixationScoreThreshold)
+	}
+	if i.SQLInjectionScoreThreshold != o.SQLInjectionScoreThreshold {
+		t.Errorf("expected %d waf: got %d", i.SQLInjectionScoreThreshold, o.SQLInjectionScoreThreshold)
+	}
+	if i.TotalArgLength != o.TotalArgLength {
+		t.Errorf("expected %d waf: got %d", i.TotalArgLength, o.TotalArgLength)
+	}
+	if i.WarningAnomalyScore != o.WarningAnomalyScore {
+		t.Errorf("expected %d waf: got %d", i.WarningAnomalyScore, o.WarningAnomalyScore)
+	}
+	if i.XSSScoreThreshold != o.XSSScoreThreshold {
+		t.Errorf("expected %d waf: got %d", i.XSSScoreThreshold, o.XSSScoreThreshold)
+	}
+
+}
+
+func buildUpdateInput() *UpdateWAFVersionInput {
+	return &UpdateWAFVersionInput{
+		Comment:                          "my comment",
+		AllowedHTTPVersions:              "HTTP/1.0 HTTP/1.1",
+		AllowedMethods:                   "GET HEAD POST",
+		AllowedRequestContentType:        "application/x-www-form-urlencoded|multipart/form-data|text/xml|application/xml",
+		AllowedRequestContentTypeCharset: "utf-8|iso-8859-1",
+		ArgLength:                        800,
+		ArgNameLength:                    200,
+		CombinedFileSizes:                20000000,
+		CriticalAnomalyScore:             12,
+		CRSValidateUTF8Encoding:          true,
+		ErrorAnomalyScore:                10,
+		HighRiskCountryCodes:             "gb",
+		HTTPViolationScoreThreshold:      20,
+		InboundAnomalyScoreThreshold:     20,
+		LFIScoreThreshold:                20,
+		MaxFileSize:                      20000000,
+		MaxNumArgs:                       510,
+		NoticeAnomalyScore:               8,
+		ParanoiaLevel:                    2,
+		PHPInjectionScoreThreshold:       20,
+		RCEScoreThreshold:                20,
+		RestrictedExtensions:             ".asa/ .asax/ .ascx/ .axd/ .backup/ .bak/ .bat/ .cdx/ .cer/ .cfg/ .cmd/ .com/",
+		RestrictedHeaders:                "/proxy/ /lock-token/",
+		RFIScoreThreshold:                20,
+		SessionFixationScoreThreshold:    20,
+		SQLInjectionScoreThreshold:       20,
+		TotalArgLength:                   12800,
+		WarningAnomalyScore:              20,
+		XSSScoreThreshold:                20,
 	}
 }
 

@@ -298,12 +298,6 @@ func deleteTestResponseObject(t *testing.T, fixture, serviceID, name string, ser
 	}
 }
 
-
-
-
-
-
-
 func deleteTestService(t *testing.T, cleanupFixture string, serviceId string) {
 
 	var err error
