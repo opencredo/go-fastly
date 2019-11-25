@@ -878,6 +878,7 @@ func getPages(body io.Reader) (paginationInfo, io.Reader, error) {
 	return pages.Links, bytes.NewReader(buf.Bytes()), nil
 }
 
+// getResponseInfo parses a response to get the pagination and metadata info.
 func getResponseInfo(body io.Reader) (infoResponse, error) {
 
 	bodyBytes, err := ioutil.ReadAll(body)
