@@ -255,7 +255,7 @@ func (c *Client) EnableWAF(id string) error {
 	return nil
 }
 
-// DisableWAF disables a WAF
+// DisableWAF disables a WAF.
 func (c *Client) DisableWAF(id string) error {
 
 	if id == "" {
