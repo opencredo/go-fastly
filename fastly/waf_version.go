@@ -13,11 +13,12 @@ import (
 // decoding into.
 var WAFVersionType = reflect.TypeOf(new(WAFVersion))
 
-// paginationPageSize used as PageSize by the ListAllWAFVersions function
+// paginationPageSize used as PageSize by the ListAllWAFVersions function.
 const paginationPageSize = 20
 
-// WAFVersion is the information about a firewall version object.
+// WAFVersion is the information about a WAF version object.
 type WAFVersion struct {
+	// See documentation here https://docs.fastly.com/api/ngwaf#api-section-ngwaf_firewall_versions
 	ID                               string     `jsonapi:"primary,waf_firewall_version"`
 	Number                           int        `jsonapi:"attr,number"`
 	Active                           bool       `jsonapi:"attr,active"`
@@ -63,49 +64,25 @@ type WAFVersion struct {
 	ActiveRulesOWASPBlockCount       int        `jsonapi:"attr,active_rules_owasp_block_count"`
 }
 
-// WAFVersionResponse represents a list waf versions full response.
+// WAFVersionResponse represents a list WAF versions full response.
 type WAFVersionResponse struct {
 	Items []*WAFVersion
 	Info  infoResponse
 }
 
-// ListWAFVersionsInput used as input for listing waf versions
+// ListWAFVersionsInput used as input for listing WAF versions.
 type ListWAFVersionsInput struct {
-	// The firewall id
+	// The Web Application Firewall's id.
 	WAFID string
-	// Limit the number of returned
+	// Limit the number records returned.
 	PageSize int
-	// Request a specific page of firewalls.
+	// Request a specific page of WAFs.
 	PageNumber int
 	// Include relationships. Optional, comma-separated values. Permitted values: waf_firewall_versions.
 	Include string
 }
 
-func (i *ListWAFVersionsInput) formatFilters() map[string]string {
-
-	result := map[string]string{}
-	pairings := map[string]interface{}{
-		"page[size]":   i.PageSize,
-		"page[number]": i.PageNumber,
-		"include":      i.Include,
-	}
-
-	for key, value := range pairings {
-		switch t := reflect.TypeOf(value).String(); t {
-		case "string":
-			if value != "" {
-				result[key] = value.(string)
-			}
-		case "int":
-			if value != 0 {
-				result[key] = strconv.Itoa(value.(int))
-			}
-		}
-	}
-	return result
-}
-
-// ListWAFVersions returns the list of waf versions for a given waf id.
+// ListWAFVersions returns the list of VAF versions for a given WAF id.
 func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, error) {
 
 	if i.WAFID == "" {
@@ -144,7 +121,7 @@ func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, 
 	}, nil
 }
 
-// ListWAFVersions returns the complete list of waf versions for a given waf id. It iterates through
+// ListAllWAFVersions returns the complete list of WAF versions for a given WAF id. It iterates through
 // all existing pages to ensure all waf versions are returned at once.
 func (c *Client) ListAllWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, error) {
 
@@ -152,7 +129,7 @@ func (c *Client) ListAllWAFVersions(i *ListWAFVersionsInput) (*WAFVersionRespons
 		return nil, ErrMissingWAFID
 	}
 
-	r := &WAFVersionResponse{Items: []*WAFVersion{},}
+	r := &WAFVersionResponse{Items: []*WAFVersion{}}
 	i.PageSize = paginationPageSize
 	i.PageNumber = 1
 	path := fmt.Sprintf("/waf/firewalls/%s/versions", i.WAFID)
@@ -164,55 +141,15 @@ func (c *Client) ListAllWAFVersions(i *ListWAFVersionsInput) (*WAFVersionRespons
 	return r, nil
 }
 
-func (c *Client) paginateThroughAllWAFVersions(path string, i *ListWAFVersionsInput, r *WAFVersionResponse) error {
-
-	resp, err := c.Get(path, &RequestOptions{
-		Params: i.formatFilters(),
-	})
-	if err != nil {
-		return err
-	}
-
-	info, body, err := getInfo(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	data, err := jsonapi.UnmarshalManyPayload(body, WAFVersionType)
-	if err != nil {
-		return err
-	}
-
-	var wafVersions []*WAFVersion
-	for i := range data {
-		typed, ok := data[i].(*WAFVersion)
-		if !ok {
-			return fmt.Errorf("got back a non-WAFVersion response")
-		}
-		wafVersions = append(wafVersions, typed)
-	}
-
-	r.Items = append(r.Items, wafVersions...)
-	r.Info = info
-
-	if info.Links.Next != "" {
-		i.PageNumber = i.PageNumber+1
-		if err := c.paginateThroughAllWAFVersions(path, i, r); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// GetWAFVersionInput used as input for GetWAFVersion function
+// GetWAFVersionInput used as input for GetWAFVersion function.
 type GetWAFVersionInput struct {
-	// The firewall id
+	// The Web Application Firewall's id.
 	WAFID string
-	// the firewall version (number)
+	// the Web Application Firewall's version (number).
 	WAFVersion int
 }
 
-// GetWAFVersion GetWAFVersion details for given WAF version
+// GetWAFVersion gets details for given WAF version.
 func (c *Client) GetWAFVersion(i *GetWAFVersionInput) (*WAFVersion, error) {
 
 	if i.WAFID == "" {
@@ -236,7 +173,7 @@ func (c *Client) GetWAFVersion(i *GetWAFVersionInput) (*WAFVersion, error) {
 	return &wafVer, nil
 }
 
-// UpdateWAFInput is used as input to the UpdateWAFVersion function.
+// UpdateWAFVersionInput is used as input to the UpdateWAFVersion function.
 type UpdateWAFVersionInput struct {
 	WAFID                            string
 	WAFVersion                       int
@@ -272,7 +209,7 @@ type UpdateWAFVersionInput struct {
 	XSSScoreThreshold                int    `jsonapi:"attr,xss_score_threshold,omitempty"`
 }
 
-// UpdateWAF updates a specific WAF version.
+// UpdateWAFVersion updates a specific WAF version.
 func (c *Client) UpdateWAFVersion(i *UpdateWAFVersionInput) (*WAFVersion, error) {
 	if i.WAFID == "" {
 		return nil, ErrMissingWAFID
@@ -299,7 +236,7 @@ func (c *Client) UpdateWAFVersion(i *UpdateWAFVersionInput) (*WAFVersion, error)
 	return &waf, nil
 }
 
-// LockWAFVersionInput used as input for locking a WAF version
+// LockWAFVersionInput used as input for locking a WAF version.
 type LockWAFVersionInput struct {
 	WAFID      string
 	WAFVersion int
@@ -328,7 +265,7 @@ func (c *Client) LockWAFVersion(i *LockWAFVersionInput) (*WAFVersion, error) {
 	return &waf, nil
 }
 
-// CloneWAFVersionInput used as input for cloning a WAF version
+// CloneWAFVersionInput used as input for cloning a WAF version.
 type CloneWAFVersionInput struct {
 	WAFID      string
 	WAFVersion int
@@ -357,7 +294,7 @@ func (c *Client) CloneWAFVersion(i *CloneWAFVersionInput) (*WAFVersion, error) {
 	return &waf, nil
 }
 
-// DeployWAFVersionInput used as input for deploying a WAF version
+// DeployWAFVersionInput used as input for deploying a WAF version.
 type DeployWAFVersionInput struct {
 	WAFID      string
 	WAFVersion int
@@ -378,6 +315,70 @@ func (c *Client) DeployWAFVersion(i *DeployWAFVersionInput) error {
 	_, err := c.PostJSONAPI(path, &DeployWAFVersionInput{}, nil)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (i *ListWAFVersionsInput) formatFilters() map[string]string {
+
+	result := map[string]string{}
+	pairings := map[string]interface{}{
+		"page[size]":   i.PageSize,
+		"page[number]": i.PageNumber,
+		"include":      i.Include,
+	}
+
+	for key, value := range pairings {
+		switch t := reflect.TypeOf(value).String(); t {
+		case "string":
+			if value != "" {
+				result[key] = value.(string)
+			}
+		case "int":
+			if value != 0 {
+				result[key] = strconv.Itoa(value.(int))
+			}
+		}
+	}
+	return result
+}
+
+func (c *Client) paginateThroughAllWAFVersions(path string, i *ListWAFVersionsInput, r *WAFVersionResponse) error {
+
+	resp, err := c.Get(path, &RequestOptions{
+		Params: i.formatFilters(),
+	})
+	if err != nil {
+		return err
+	}
+
+	info, body, err := getInfo(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	data, err := jsonapi.UnmarshalManyPayload(body, WAFVersionType)
+	if err != nil {
+		return err
+	}
+
+	var wafVersions []*WAFVersion
+	for i := range data {
+		typed, ok := data[i].(*WAFVersion)
+		if !ok {
+			return fmt.Errorf("got back a non-WAFVersion response")
+		}
+		wafVersions = append(wafVersions, typed)
+	}
+
+	r.Items = append(r.Items, wafVersions...)
+	r.Info = info
+
+	if info.Links.Next != "" {
+		i.PageNumber = i.PageNumber + 1
+		if err := c.paginateThroughAllWAFVersions(path, i, r); err != nil {
+			return err
+		}
 	}
 	return nil
 }

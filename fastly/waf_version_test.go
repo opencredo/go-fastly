@@ -42,17 +42,19 @@ func TestClient_WAF_Versions(t *testing.T) {
 	}
 	defer func() {
 		record(t, fixtureBase+"/cleanup", func(c *Client) {
-			c.DeleteWAF(&DeleteWAFInput{
+			if err := c.DeleteWAF(&DeleteWAFInput{
 				Version: strconv.Itoa(tv.Number),
 				ID:      waf.ID,
-			})
+			}); err != nil {
+				t.Fatal(err)
+			}
 		})
 	}()
 
 	var wafVerResp *WAFVersionResponse
 	record(t, fixtureBase+"/list", func(c *Client) {
 		wafVerResp, err = c.ListWAFVersions(&ListWAFVersionsInput{
-			WAFID:      waf.ID,
+			WAFID: waf.ID,
 		})
 	})
 	if err != nil {
@@ -96,15 +98,15 @@ func TestClient_WAF_Versions(t *testing.T) {
 		t.Fatal(err)
 	}
 	if wafVer == nil {
-		t.Error("expected waf, got nil" )
+		t.Error("expected waf, got nil")
 	}
 
 	threshold := 80
 	record(t, fixtureBase+"/update", func(c *Client) {
 		wafVer, err = c.UpdateWAFVersion(&UpdateWAFVersionInput{
-			WAFID:      waf.ID,
-			WAFVersion: 2,
-			ID:   wafVer.ID,
+			WAFID:                       waf.ID,
+			WAFVersion:                  2,
+			ID:                          wafVer.ID,
 			HTTPViolationScoreThreshold: threshold,
 		})
 	})
@@ -112,7 +114,7 @@ func TestClient_WAF_Versions(t *testing.T) {
 		t.Fatal(err)
 	}
 	if wafVer == nil {
-		t.Error("expected waf, got nil" )
+		t.Error("expected waf, got nil")
 	}
 	if wafVer.HTTPViolationScoreThreshold != threshold {
 		t.Errorf("expected %d waf: got %d", threshold, wafVer.HTTPViolationScoreThreshold)
@@ -128,7 +130,7 @@ func TestClient_WAF_Versions(t *testing.T) {
 		t.Fatal(err)
 	}
 	if wafVer == nil {
-		t.Error("expected waf, got nil" )
+		t.Error("expected waf, got nil")
 	}
 	if !wafVer.Locked {
 		t.Errorf("expected locked = true waf: got locked == %v", wafVer.Locked)
@@ -136,7 +138,7 @@ func TestClient_WAF_Versions(t *testing.T) {
 
 	record(t, fixtureBase+"/list_all", func(c *Client) {
 		wafVerResp, err = c.ListAllWAFVersions(&ListWAFVersionsInput{
-			WAFID:      waf.ID,
+			WAFID: waf.ID,
 		})
 	})
 	if err != nil {
@@ -154,14 +156,14 @@ func TestClient_listWAFVersions_formatFilters(t *testing.T) {
 	}{
 		{
 			remote: &ListWAFVersionsInput{
-				PageSize:      2,
-				PageNumber:    2,
-				Include:       "included",
+				PageSize:   2,
+				PageNumber: 2,
+				Include:    "included",
 			},
 			local: map[string]string{
-				"page[size]":                     "2",
-				"page[number]":                   "2",
-				"include":                        "included",
+				"page[size]":   "2",
+				"page[number]": "2",
+				"include":      "included",
 			},
 		},
 	}
@@ -183,7 +185,6 @@ func TestClient_ListWAFVersions_validation(t *testing.T) {
 	}
 }
 
-
 func TestClient_ListAllWAFVersions_validation(t *testing.T) {
 	var err error
 	_, err = testClient.ListAllWAFVersions(&ListWAFVersionsInput{
@@ -204,7 +205,7 @@ func TestClient_GetWAFVersion_validation(t *testing.T) {
 	}
 
 	_, err = testClient.GetWAFVersion(&GetWAFVersionInput{
-		WAFID: "1",
+		WAFID:      "1",
 		WAFVersion: 0,
 	})
 	if err != ErrMissingWAFNumber {
@@ -222,7 +223,7 @@ func TestClient_UpdateWAFVersion_validation(t *testing.T) {
 	}
 
 	_, err = testClient.UpdateWAFVersion(&UpdateWAFVersionInput{
-		WAFID: "1",
+		WAFID:      "1",
 		WAFVersion: 0,
 	})
 	if err != ErrMissingWAFNumber {
@@ -230,9 +231,9 @@ func TestClient_UpdateWAFVersion_validation(t *testing.T) {
 	}
 
 	_, err = testClient.UpdateWAFVersion(&UpdateWAFVersionInput{
-		WAFID: "1",
+		WAFID:      "1",
 		WAFVersion: 1,
-		ID: "",
+		ID:         "",
 	})
 	if err != ErrMissingWAFVersionID {
 		t.Errorf("bad error: %s", err)
@@ -249,7 +250,7 @@ func TestClient_LockWAFVersion_validation(t *testing.T) {
 	}
 
 	_, err = testClient.LockWAFVersion(&LockWAFVersionInput{
-		WAFID: "1",
+		WAFID:      "1",
 		WAFVersion: 0,
 	})
 	if err != ErrMissingWAFNumber {
@@ -267,7 +268,7 @@ func TestClient_CloneWAFVersion_validation(t *testing.T) {
 	}
 
 	_, err = testClient.CloneWAFVersion(&CloneWAFVersionInput{
-		WAFID: "1",
+		WAFID:      "1",
 		WAFVersion: 0,
 	})
 	if err != ErrMissingWAFNumber {
@@ -284,14 +285,9 @@ func TestClient_DeployWAFVersion_validation(t *testing.T) {
 	}
 
 	if err = testClient.DeployWAFVersion(&DeployWAFVersionInput{
-		WAFID: "1",
+		WAFID:      "1",
 		WAFVersion: 0,
 	}); err != ErrMissingWAFNumber {
 		t.Errorf("bad error: %s", err)
 	}
 }
-
-
-
-
-
