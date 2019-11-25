@@ -307,7 +307,7 @@ func (c *Client) DeployWAFVersion(i *DeployWAFInput) error {
 
 // DeleteWAFInput is used as input to the DeleteWAFInput function.
 type DeleteWAFInput struct {
-	// this is the WAF id
+	// This is the WAF ID.
 	ID string `jsonapi:"primary,waf_firewall"`
 	// The service version.
 	Version string `jsonapi:"attr,service_version_number"`
