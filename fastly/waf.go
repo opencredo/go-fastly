@@ -98,11 +98,15 @@ func (c *Client) ListWAFs(i *ListWAFsInput) (*WAFResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	info, body, err := getInfo(resp.Body)
+
+	var buf bytes.Buffer
+	tee := io.TeeReader(resp.Body, &buf)
+
+	info, err := getResponseInfo(tee)
 	if err != nil {
 		return nil, err
 	}
-	data, err := jsonapi.UnmarshalManyPayload(body, wafType)
+	data, err := jsonapi.UnmarshalManyPayload(bytes.NewReader(buf.Bytes()), wafType)
 	if err != nil {
 		return nil, err
 	}
@@ -874,20 +878,18 @@ func getPages(body io.Reader) (paginationInfo, io.Reader, error) {
 	return pages.Links, bytes.NewReader(buf.Bytes()), nil
 }
 
-func getInfo(body io.Reader) (infoResponse, io.Reader, error) {
-	var buf bytes.Buffer
-	tee := io.TeeReader(body, &buf)
+func getResponseInfo(body io.Reader) (infoResponse, error) {
 
-	bodyBytes, err := ioutil.ReadAll(tee)
+	bodyBytes, err := ioutil.ReadAll(body)
 	if err != nil {
-		return infoResponse{}, nil, err
+		return infoResponse{}, err
 	}
 
 	var info infoResponse
 	if err := json.Unmarshal(bodyBytes, &info); err != nil {
-		return infoResponse{}, nil, err
+		return infoResponse{}, err
 	}
-	return info, bytes.NewReader(buf.Bytes()), nil
+	return info, nil
 }
 
 // GetWAFRuleStatusInput specifies the parameters for the GetWAFRuleStatus call.
