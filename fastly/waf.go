@@ -277,7 +277,7 @@ func (c *Client) DisableWAF(id string) error {
 
 // DeployWAFInput is the input configuration used to deploy a WAF.
 type DeployWAFInput struct {
-	// These are the Id and version of the WAF
+	// These are the ID and version of the WAF.
 	ID      string
 	Version int
 }
