@@ -830,7 +830,7 @@ type linksResponse struct {
 	Links paginationInfo `json:"links"`
 }
 
-// infoResponse used to pull the links and meta from the result
+// infoResponse is used to pull the links and meta from the result.
 type infoResponse struct {
 	Links paginationInfo `json:"links"`
 	Meta  metaInfo       `json:"meta"`
