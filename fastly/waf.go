@@ -282,7 +282,7 @@ type DeployWAFInput struct {
 	Version int
 }
 
-// DeployWAFVersion deploys (activate) a WAF
+// DeployWAFVersion deploys (i.e. activates) a WAF by version.
 func (c *Client) DeployWAFVersion(i *DeployWAFInput) error {
 
 	if i.ID == "" {
