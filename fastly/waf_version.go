@@ -1,7 +1,9 @@
 package fastly
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"reflect"
 	"strconv"
 	"time"
@@ -97,12 +99,15 @@ func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, 
 		return nil, err
 	}
 
-	info, body, err := getInfo(resp.Body)
+	var buf bytes.Buffer
+	tee := io.TeeReader(resp.Body, &buf)
+
+	info, err := getResponseInfo(tee)
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := jsonapi.UnmarshalManyPayload(body, WAFVersionType)
+	data, err := jsonapi.UnmarshalManyPayload(bytes.NewReader(buf.Bytes()), WAFVersionType)
 	if err != nil {
 		return nil, err
 	}
@@ -352,12 +357,15 @@ func (c *Client) paginateThroughAllWAFVersions(path string, i *ListWAFVersionsIn
 		return err
 	}
 
-	info, body, err := getInfo(resp.Body)
+	var buf bytes.Buffer
+	tee := io.TeeReader(resp.Body, &buf)
+
+	info, err := getResponseInfo(tee)
 	if err != nil {
 		return err
 	}
 
-	data, err := jsonapi.UnmarshalManyPayload(body, WAFVersionType)
+	data, err := jsonapi.UnmarshalManyPayload(bytes.NewReader(buf.Bytes()), WAFVersionType)
 	if err != nil {
 		return err
 	}
