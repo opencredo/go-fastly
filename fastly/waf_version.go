@@ -16,7 +16,7 @@ import (
 var WAFVersionType = reflect.TypeOf(new(WAFVersion))
 
 // paginationPageSize used as PageSize by the ListAllWAFVersions function.
-const paginationPageSize = 20
+const paginationPageSize = 100
 
 // WAFVersion is the information about a WAF version object.
 type WAFVersion struct {
@@ -126,7 +126,7 @@ func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, 
 	}, nil
 }
 
-// ListWAFVersionsInput used as input for listing all WAF versions.
+// ListAllWAFVersionsInput used as input for listing all WAF versions.
 type ListAllWAFVersionsInput struct {
 	// The Web Application Firewall's id.
 	WAFID string
@@ -149,6 +149,7 @@ func (c *Client) ListAllWAFVersions(i *ListAllWAFVersionsInput) (*WAFVersionResp
 			WAFID:      i.WAFID,
 			Include:    i.Include,
 			PageNumber: currentPage,
+			PageSize:   paginationPageSize,
 		})
 		if err != nil {
 			return r, err

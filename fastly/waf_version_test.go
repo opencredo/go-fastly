@@ -334,14 +334,6 @@ func TestClient_GetWAFVersion_validation(t *testing.T) {
 	if err != ErrMissingWAFID {
 		t.Errorf("bad error: %s", err)
 	}
-
-	_, err = testClient.GetWAFVersion(&GetWAFVersionInput{
-		WAFID:            "1",
-		WAFVersionNumber: 0,
-	})
-	if err != ErrMissingWAFVersionNumber {
-		t.Errorf("bad error: %s", err)
-	}
 }
 
 func TestClient_UpdateWAFVersion_validation(t *testing.T) {
