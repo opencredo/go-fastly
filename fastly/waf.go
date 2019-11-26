@@ -40,7 +40,6 @@ type WAF struct {
 }
 
 // WAFResponse an object containing the list of WAF results.
-
 type WAFResponse struct {
 	Items []*WAF
 	Info  infoResponse

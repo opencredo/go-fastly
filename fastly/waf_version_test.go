@@ -133,7 +133,7 @@ func TestClient_WAF_Versions(t *testing.T) {
 	}
 
 	record(t, fixtureBase+"/list_all", func(c *Client) {
-		wafVerResp, err = c.ListAllWAFVersions(&ListWAFVersionsInput{
+		wafVerResp, err = c.ListAllWAFVersions(&ListAllWAFVersionsInput{
 			WAFID: waf.ID,
 		})
 	})
@@ -309,12 +309,21 @@ func TestClient_ListWAFVersions_validation(t *testing.T) {
 
 func TestClient_ListAllWAFVersions_validation(t *testing.T) {
 	var err error
-	_, err = testClient.ListAllWAFVersions(&ListWAFVersionsInput{
+	_, err = testClient.ListAllWAFVersions(&ListAllWAFVersionsInput{
 		WAFID: "",
 	})
 	if err != ErrMissingWAFID {
 		t.Errorf("bad error: %s", err)
 	}
+
+	resp, err := testClient.ListAllWAFVersions(&ListAllWAFVersionsInput{
+		WAFID: "4QXAURauMXa4KHQ3kRn5Yr",
+	})
+	if err != nil {
+		t.Errorf("bad error: %s", err)
+	}
+
+	print(resp)
 }
 
 func TestClient_GetWAFVersion_validation(t *testing.T) {

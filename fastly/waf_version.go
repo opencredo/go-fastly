@@ -126,24 +126,41 @@ func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, 
 	}, nil
 }
 
+// ListWAFVersionsInput used as input for listing all WAF versions.
+type ListAllWAFVersionsInput struct {
+	// The Web Application Firewall's id.
+	WAFID string
+	// Include relationships. Optional, comma-separated values. Permitted values: waf_firewall_versions.
+	Include string
+}
+
 // ListAllWAFVersions returns the complete list of WAF versions for a given WAF id. It iterates through
 // all existing pages to ensure all waf versions are returned at once.
-func (c *Client) ListAllWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, error) {
+func (c *Client) ListAllWAFVersions(i *ListAllWAFVersionsInput) (*WAFVersionResponse, error) {
 
 	if i.WAFID == "" {
 		return nil, ErrMissingWAFID
 	}
 
-	r := &WAFVersionResponse{Items: []*WAFVersion{}}
-	i.PageSize = paginationPageSize
-	i.PageNumber = 1
-	path := fmt.Sprintf("/waf/firewalls/%s/versions", i.WAFID)
-	err := c.paginateThroughAllWAFVersions(path, i, r)
-	if err != nil {
-		return nil, err
-	}
+	currentPage := 1
+	result := &WAFVersionResponse{Items: []*WAFVersion{}}
+	for {
+		r, err := c.ListWAFVersions(&ListWAFVersionsInput{
+			WAFID:      i.WAFID,
+			Include:    i.Include,
+			PageNumber: currentPage,
+		})
+		if err != nil {
+			return r, err
+		}
 
-	return r, nil
+		currentPage++
+		result.Items = append(result.Items, r.Items...)
+
+		if r.Info.Links.Next == "" || len(r.Items) == 0 {
+			return result, nil
+		}
+	}
 }
 
 // GetWAFVersionInput used as input for GetWAFVersion function.
@@ -346,47 +363,4 @@ func (i *ListWAFVersionsInput) formatFilters() map[string]string {
 		}
 	}
 	return result
-}
-
-func (c *Client) paginateThroughAllWAFVersions(path string, i *ListWAFVersionsInput, r *WAFVersionResponse) error {
-
-	resp, err := c.Get(path, &RequestOptions{
-		Params: i.formatFilters(),
-	})
-	if err != nil {
-		return err
-	}
-
-	var buf bytes.Buffer
-	tee := io.TeeReader(resp.Body, &buf)
-
-	info, err := getResponseInfo(tee)
-	if err != nil {
-		return err
-	}
-
-	data, err := jsonapi.UnmarshalManyPayload(bytes.NewReader(buf.Bytes()), WAFVersionType)
-	if err != nil {
-		return err
-	}
-
-	var wafVersions []*WAFVersion
-	for i := range data {
-		typed, ok := data[i].(*WAFVersion)
-		if !ok {
-			return fmt.Errorf("got back a non-WAFVersion response")
-		}
-		wafVersions = append(wafVersions, typed)
-	}
-
-	r.Items = append(r.Items, wafVersions...)
-	r.Info = info
-
-	if info.Links.Next != "" {
-		i.PageNumber = i.PageNumber + 1
-		if err := c.paginateThroughAllWAFVersions(path, i, r); err != nil {
-			return err
-		}
-	}
-	return nil
 }
