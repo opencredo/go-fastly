@@ -39,7 +39,8 @@ type WAF struct {
 	ActiveRulesOWASPScoreCount     int        `jsonapi:"attr,active_rules_owasp_score_count"`
 }
 
-// WAFResponse th eobject containing the list of waf results
+// WAFResponse an object containing the list of WAF results.
+
 type WAFResponse struct {
 	Items []*WAF
 	Info  infoResponse
@@ -98,11 +99,15 @@ func (c *Client) ListWAFs(i *ListWAFsInput) (*WAFResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	info, body, err := getInfo(resp.Body)
+
+	var buf bytes.Buffer
+	tee := io.TeeReader(resp.Body, &buf)
+
+	info, err := getResponseInfo(tee)
 	if err != nil {
 		return nil, err
 	}
-	data, err := jsonapi.UnmarshalManyPayload(body, wafType)
+	data, err := jsonapi.UnmarshalManyPayload(bytes.NewReader(buf.Bytes()), wafType)
 	if err != nil {
 		return nil, err
 	}
@@ -255,7 +260,7 @@ func (c *Client) EnableWAF(id string) error {
 	return nil
 }
 
-// DisableWAF disables a WAF
+// DisableWAF disables a WAF.
 func (c *Client) DisableWAF(id string) error {
 
 	if id == "" {
@@ -277,13 +282,13 @@ func (c *Client) DisableWAF(id string) error {
 
 // DeleteWAFInput is used as input to the DeleteWAFInput function.
 type DeleteWAFInput struct {
-	// this is the WAF id
+	// This is the WAF ID.
 	ID string `jsonapi:"primary,waf_firewall"`
-	// The service version
+	// The service version.
 	Version string `jsonapi:"attr,service_version_number"`
 }
 
-// DeleteWAF deletes a given WAF from its service
+// DeleteWAF deletes a given WAF from its service.
 func (c *Client) DeleteWAF(i *DeleteWAFInput) error {
 
 	if i.Version == "" {
@@ -804,7 +809,7 @@ type linksResponse struct {
 	Links paginationInfo `json:"links"`
 }
 
-// infoResponse used to pull the links and meta from the result
+// infoResponse is used to pull the links and meta from the result.
 type infoResponse struct {
 	Links paginationInfo `json:"links"`
 	Meta  metaInfo       `json:"meta"`
@@ -848,20 +853,20 @@ func getPages(body io.Reader) (paginationInfo, io.Reader, error) {
 	return pages.Links, bytes.NewReader(buf.Bytes()), nil
 }
 
-func getInfo(body io.Reader) (infoResponse, io.Reader, error) {
-	var buf bytes.Buffer
-	tee := io.TeeReader(body, &buf)
+// getResponseInfo parses a response to get the pagination and metadata info.
+func getResponseInfo(body io.Reader) (infoResponse, error) {
 
-	bodyBytes, err := ioutil.ReadAll(tee)
+	bodyBytes, err := ioutil.ReadAll(body)
 	if err != nil {
-		return infoResponse{}, nil, err
+		return infoResponse{}, err
 	}
 
 	var info infoResponse
 	if err := json.Unmarshal(bodyBytes, &info); err != nil {
-		return infoResponse{}, nil, err
+		return infoResponse{}, err
 	}
-	return info, bytes.NewReader(buf.Bytes()), nil
+	return info, nil
+
 }
 
 // GetWAFRuleStatusInput specifies the parameters for the GetWAFRuleStatus call.
