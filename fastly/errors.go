@@ -93,17 +93,17 @@ var ErrMissingIP = errors.New("Missing requried field 'IP'")
 // requires a "EventID" key, but one was not set
 var ErrMissingEventID = errors.New("Missing required field 'EventID'")
 
-// ErrMissingWafID is an error that is returned was an input struct
-// requires a "WafID" key, but one was not set
+// ErrMissingWafID is an error that is returned when an input struct
+// requires a "WAFID" key, but one was not set
 var ErrMissingWAFID = errors.New("Missing required field 'WAFID'")
 
-// ErrMissingWAFNumber is an error that is returned was an input struct
-// requires a "WafID" key, but one was not set
-var ErrMissingWAFNumber = errors.New("Missing required field 'Number'")
+// ErrMissingWAFVersionNumber is an error that is returned when an input struct
+// requires a "WAFVersionNumber" key, but one was not set
+var ErrMissingWAFVersionNumber = errors.New("Missing required field 'WAFVersionNumber'")
 
-// ErrMissingWAFVersionID is an error that is returned was an input struct
-// requires a "ID" key, but one was not set
-var ErrMissingWAFVersionID = errors.New("Missing required field 'ID'")
+// ErrMissingWAFVersionID is an error that is returned when an input struct
+// requires a "WAFVersionID" key, but one was not set
+var ErrMissingWAFVersionID = errors.New("Missing required field 'WAFVersionID'")
 
 // ErrMissingOWASPID is an error that is returned was an input struct
 // requires a "OWASPID" key, but one was not set

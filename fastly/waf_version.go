@@ -151,7 +151,7 @@ type GetWAFVersionInput struct {
 	// The Web Application Firewall's id.
 	WAFID string
 	// the Web Application Firewall's version (number).
-	WAFVersion int
+	WAFVersionNumber int
 }
 
 // GetWAFVersion gets details for given WAF version.
@@ -161,11 +161,11 @@ func (c *Client) GetWAFVersion(i *GetWAFVersionInput) (*WAFVersion, error) {
 		return nil, ErrMissingWAFID
 	}
 
-	if i.WAFVersion == 0 {
-		return nil, ErrMissingWAFNumber
+	if i.WAFVersionNumber == 0 {
+		return nil, ErrMissingWAFVersionNumber
 	}
 
-	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d", i.WAFID, i.WAFVersion)
+	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d", i.WAFID, i.WAFVersionNumber)
 	resp, err := c.Get(path, nil)
 	if err != nil {
 		return nil, err
@@ -181,8 +181,8 @@ func (c *Client) GetWAFVersion(i *GetWAFVersionInput) (*WAFVersion, error) {
 // UpdateWAFVersionInput is used as input to the UpdateWAFVersion function.
 type UpdateWAFVersionInput struct {
 	WAFID                            string
-	WAFVersion                       int
-	ID                               string `jsonapi:"primary,waf_firewall"`
+	WAFVersionID                     string `jsonapi:"primary,waf_firewall"`
+	WAFVersionNumber                 int
 	Comment                          string `jsonapi:"attr,comment,omitempty"`
 	CRSValidateUTF8Encoding          bool   `jsonapi:"attr,crs_validate_utf8_encoding,omitempty"`
 	AllowedHTTPVersions              string `jsonapi:"attr,allowed_http_versions,omitempty"`
@@ -220,15 +220,15 @@ func (c *Client) UpdateWAFVersion(i *UpdateWAFVersionInput) (*WAFVersion, error)
 		return nil, ErrMissingWAFID
 	}
 
-	if i.WAFVersion == 0 {
-		return nil, ErrMissingWAFNumber
+	if i.WAFVersionNumber == 0 {
+		return nil, ErrMissingWAFVersionNumber
 	}
 
-	if i.ID == "" {
+	if i.WAFVersionID == "" {
 		return nil, ErrMissingWAFVersionID
 	}
 
-	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d", i.WAFID, i.WAFVersion)
+	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d", i.WAFID, i.WAFVersionNumber)
 	resp, err := c.PatchJSONAPI(path, i, nil)
 	if err != nil {
 		return nil, err
@@ -243,8 +243,8 @@ func (c *Client) UpdateWAFVersion(i *UpdateWAFVersionInput) (*WAFVersion, error)
 
 // LockWAFVersionInput used as input for locking a WAF version.
 type LockWAFVersionInput struct {
-	WAFID      string
-	WAFVersion int
+	WAFID            string
+	WAFVersionNumber int
 }
 
 // LockWAFVersion locks a specific WAF version.
@@ -253,11 +253,11 @@ func (c *Client) LockWAFVersion(i *LockWAFVersionInput) (*WAFVersion, error) {
 		return nil, ErrMissingWAFID
 	}
 
-	if i.WAFVersion == 0 {
-		return nil, ErrMissingWAFNumber
+	if i.WAFVersionNumber == 0 {
+		return nil, ErrMissingWAFVersionNumber
 	}
 
-	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d/lock", i.WAFID, i.WAFVersion)
+	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d/lock", i.WAFID, i.WAFVersionNumber)
 	resp, err := c.PutJSONAPI(path, &LockWAFVersionInput{}, nil)
 	if err != nil {
 		return nil, err
@@ -272,8 +272,8 @@ func (c *Client) LockWAFVersion(i *LockWAFVersionInput) (*WAFVersion, error) {
 
 // CloneWAFVersionInput used as input for cloning a WAF version.
 type CloneWAFVersionInput struct {
-	WAFID      string
-	WAFVersion int
+	WAFID            string
+	WAFVersionNumber int
 }
 
 // CloneWAFVersion clones a specific WAF version.
@@ -282,11 +282,11 @@ func (c *Client) CloneWAFVersion(i *CloneWAFVersionInput) (*WAFVersion, error) {
 		return nil, ErrMissingWAFID
 	}
 
-	if i.WAFVersion == 0 {
-		return nil, ErrMissingWAFNumber
+	if i.WAFVersionNumber == 0 {
+		return nil, ErrMissingWAFVersionNumber
 	}
 
-	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d/clone", i.WAFID, i.WAFVersion)
+	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d/clone", i.WAFID, i.WAFVersionNumber)
 	resp, err := c.PutJSONAPI(path, &CloneWAFVersionInput{}, nil)
 	if err != nil {
 		return nil, err
@@ -301,8 +301,8 @@ func (c *Client) CloneWAFVersion(i *CloneWAFVersionInput) (*WAFVersion, error) {
 
 // DeployWAFVersionInput used as input for deploying a WAF version.
 type DeployWAFVersionInput struct {
-	WAFID      string
-	WAFVersion int
+	WAFID            string
+	WAFVersionNumber int
 }
 
 // DeployWAFVersion deploys a specific WAF version.
@@ -312,11 +312,11 @@ func (c *Client) DeployWAFVersion(i *DeployWAFVersionInput) error {
 		return ErrMissingWAFID
 	}
 
-	if i.WAFVersion == 0 {
-		return ErrMissingWAFNumber
+	if i.WAFVersionNumber == 0 {
+		return ErrMissingWAFVersionNumber
 	}
 
-	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d", i.WAFID, i.WAFVersion)
+	path := fmt.Sprintf("/waf/firewalls/%s/versions/%d", i.WAFID, i.WAFVersionNumber)
 	_, err := c.PostJSONAPI(path, &DeployWAFVersionInput{}, nil)
 	if err != nil {
 		return err

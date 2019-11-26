@@ -66,8 +66,8 @@ func TestClient_WAF_Versions(t *testing.T) {
 
 	record(t, fixtureBase+"/deploy", func(c *Client) {
 		err = c.DeployWAFVersion(&DeployWAFVersionInput{
-			WAFID:      waf.ID,
-			WAFVersion: 1,
+			WAFID:            waf.ID,
+			WAFVersionNumber: 1,
 		})
 	})
 	if err != nil {
@@ -77,8 +77,8 @@ func TestClient_WAF_Versions(t *testing.T) {
 	var wafVer *WAFVersion
 	record(t, fixtureBase+"/clone", func(c *Client) {
 		wafVer, err = c.CloneWAFVersion(&CloneWAFVersionInput{
-			WAFID:      waf.ID,
-			WAFVersion: 1,
+			WAFID:            waf.ID,
+			WAFVersionNumber: 1,
 		})
 	})
 	if err != nil {
@@ -90,8 +90,8 @@ func TestClient_WAF_Versions(t *testing.T) {
 
 	record(t, fixtureBase+"/get", func(c *Client) {
 		wafVer, err = c.GetWAFVersion(&GetWAFVersionInput{
-			WAFID:      waf.ID,
-			WAFVersion: 2,
+			WAFID:            waf.ID,
+			WAFVersionNumber: 2,
 		})
 	})
 	if err != nil {
@@ -103,8 +103,8 @@ func TestClient_WAF_Versions(t *testing.T) {
 
 	input := buildUpdateInput()
 	input.WAFID = waf.ID
-	input.WAFVersion = 2
-	input.ID = wafVer.ID
+	input.WAFVersionNumber = 2
+	input.WAFVersionID = wafVer.ID
 	record(t, fixtureBase+"/update", func(c *Client) {
 		wafVer, err = c.UpdateWAFVersion(input)
 	})
@@ -118,8 +118,8 @@ func TestClient_WAF_Versions(t *testing.T) {
 
 	record(t, fixtureBase+"/lock", func(c *Client) {
 		wafVer, err = c.LockWAFVersion(&LockWAFVersionInput{
-			WAFID:      waf.ID,
-			WAFVersion: 2,
+			WAFID:            waf.ID,
+			WAFVersionNumber: 2,
 		})
 	})
 	if err != nil {
@@ -147,8 +147,8 @@ func TestClient_WAF_Versions(t *testing.T) {
 
 func verifyWAFVersionUpdate(t *testing.T, i *UpdateWAFVersionInput, o *WAFVersion) {
 
-	if i.ID != o.ID {
-		t.Errorf("expected %s waf: got %s", i.ID, o.ID)
+	if i.WAFVersionID != o.ID {
+		t.Errorf("expected %s waf: got %s", i.WAFVersionID, o.ID)
 	}
 	if i.AllowedHTTPVersions != o.AllowedHTTPVersions {
 		t.Errorf("expected %s waf: got %s", i.AllowedHTTPVersions, o.AllowedHTTPVersions)
@@ -327,10 +327,10 @@ func TestClient_GetWAFVersion_validation(t *testing.T) {
 	}
 
 	_, err = testClient.GetWAFVersion(&GetWAFVersionInput{
-		WAFID:      "1",
-		WAFVersion: 0,
+		WAFID:            "1",
+		WAFVersionNumber: 0,
 	})
-	if err != ErrMissingWAFNumber {
+	if err != ErrMissingWAFVersionNumber {
 		t.Errorf("bad error: %s", err)
 	}
 }
@@ -345,17 +345,17 @@ func TestClient_UpdateWAFVersion_validation(t *testing.T) {
 	}
 
 	_, err = testClient.UpdateWAFVersion(&UpdateWAFVersionInput{
-		WAFID:      "1",
-		WAFVersion: 0,
+		WAFID:            "1",
+		WAFVersionNumber: 0,
 	})
-	if err != ErrMissingWAFNumber {
+	if err != ErrMissingWAFVersionNumber {
 		t.Errorf("bad error: %s", err)
 	}
 
 	_, err = testClient.UpdateWAFVersion(&UpdateWAFVersionInput{
-		WAFID:      "1",
-		WAFVersion: 1,
-		ID:         "",
+		WAFID:            "1",
+		WAFVersionNumber: 1,
+		WAFVersionID:     "",
 	})
 	if err != ErrMissingWAFVersionID {
 		t.Errorf("bad error: %s", err)
@@ -372,10 +372,10 @@ func TestClient_LockWAFVersion_validation(t *testing.T) {
 	}
 
 	_, err = testClient.LockWAFVersion(&LockWAFVersionInput{
-		WAFID:      "1",
-		WAFVersion: 0,
+		WAFID:            "1",
+		WAFVersionNumber: 0,
 	})
-	if err != ErrMissingWAFNumber {
+	if err != ErrMissingWAFVersionNumber {
 		t.Errorf("bad error: %s", err)
 	}
 }
@@ -390,10 +390,10 @@ func TestClient_CloneWAFVersion_validation(t *testing.T) {
 	}
 
 	_, err = testClient.CloneWAFVersion(&CloneWAFVersionInput{
-		WAFID:      "1",
-		WAFVersion: 0,
+		WAFID:            "1",
+		WAFVersionNumber: 0,
 	})
-	if err != ErrMissingWAFNumber {
+	if err != ErrMissingWAFVersionNumber {
 		t.Errorf("bad error: %s", err)
 	}
 }
@@ -407,9 +407,9 @@ func TestClient_DeployWAFVersion_validation(t *testing.T) {
 	}
 
 	if err = testClient.DeployWAFVersion(&DeployWAFVersionInput{
-		WAFID:      "1",
-		WAFVersion: 0,
-	}); err != ErrMissingWAFNumber {
+		WAFID:            "1",
+		WAFVersionNumber: 0,
+	}); err != ErrMissingWAFVersionNumber {
 		t.Errorf("bad error: %s", err)
 	}
 }
