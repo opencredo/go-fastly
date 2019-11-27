@@ -74,7 +74,7 @@ type WAFVersionResponse struct {
 
 // ListWAFVersionsInput used as input for listing WAF versions.
 type ListWAFVersionsInput struct {
-	// The Web Application Firewall's ID.
+	// The Web Application Firewall's id.
 	WAFID string
 	// Limit the number records returned.
 	PageSize int
@@ -108,7 +108,7 @@ func (i *ListWAFVersionsInput) formatFilters() map[string]string {
 	return result
 }
 
-// ListWAFVersions returns the list of VAF versions for a given WAF ID.
+// ListWAFVersions returns the list of VAF versions for a given WAF id.
 func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, error) {
 
 	if i.WAFID == "" {
@@ -152,13 +152,13 @@ func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, 
 
 // ListAllWAFVersionsInput used as input for listing all WAF versions.
 type ListAllWAFVersionsInput struct {
-	// The Web Application Firewall's ID.
+	// The Web Application Firewall's id.
 	WAFID string
 	// Include relationships. Optional, comma-separated values. Permitted values: waf_firewall_versions.
 	Include string
 }
 
-// ListAllWAFVersions returns the complete list of WAF versions for a given WAF ID. It iterates through
+// ListAllWAFVersions returns the complete list of WAF versions for a given WAF id. It iterates through
 // all existing pages to ensure all WAF versions are returned at once.
 func (c *Client) ListAllWAFVersions(i *ListAllWAFVersionsInput) (*WAFVersionResponse, error) {
 
@@ -190,7 +190,7 @@ func (c *Client) ListAllWAFVersions(i *ListAllWAFVersionsInput) (*WAFVersionResp
 
 // GetWAFVersionInput used as input for GetWAFVersion function.
 type GetWAFVersionInput struct {
-	// The Web Application Firewall's ID.
+	// The Web Application Firewall's id.
 	WAFID string
 	// the Web Application Firewall's version number.
 	WAFVersionNumber int
@@ -222,9 +222,9 @@ func (c *Client) GetWAFVersion(i *GetWAFVersionInput) (*WAFVersion, error) {
 
 // UpdateWAFVersionInput is used as input to the UpdateWAFVersion function.
 type UpdateWAFVersionInput struct {
-	// The Web Application Firewall's ID.
+	// The Web Application Firewall's id.
 	WAFID string
-	// the Web Application Firewall's version ID.
+	// the Web Application Firewall's version id.
 	WAFVersionID string `jsonapi:"primary,waf_firewall"`
 	// the Web Application Firewall's version number.
 	WAFVersionNumber                 int
@@ -288,7 +288,7 @@ func (c *Client) UpdateWAFVersion(i *UpdateWAFVersionInput) (*WAFVersion, error)
 
 // LockWAFVersionInput used as input for locking a WAF version.
 type LockWAFVersionInput struct {
-	// The Web Application Firewall's ID.
+	// The Web Application Firewall's id.
 	WAFID string
 	// The Web Application Firewall's version number.
 	WAFVersionNumber int
@@ -319,7 +319,7 @@ func (c *Client) LockWAFVersion(i *LockWAFVersionInput) (*WAFVersion, error) {
 
 // CloneWAFVersionInput used as input for cloning a WAF version.
 type CloneWAFVersionInput struct {
-	// The Web Application Firewall's ID.
+	// The Web Application Firewall's id.
 	WAFID string
 	// The Web Application Firewall's version number.
 	WAFVersionNumber int
@@ -350,7 +350,7 @@ func (c *Client) CloneWAFVersion(i *CloneWAFVersionInput) (*WAFVersion, error) {
 
 // DeployWAFVersionInput used as input for deploying a WAF version.
 type DeployWAFVersionInput struct {
-	// The Web Application Firewall's ID.
+	// The Web Application Firewall's id.
 	WAFID string
 	// The Web Application Firewall's version number.
 	WAFVersionNumber int
