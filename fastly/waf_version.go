@@ -192,7 +192,7 @@ func (c *Client) ListAllWAFVersions(i *ListAllWAFVersionsInput) (*WAFVersionResp
 type GetWAFVersionInput struct {
 	// The Web Application Firewall's id.
 	WAFID string
-	// the Web Application Firewall's version (number).
+	// the Web Application Firewall's version number.
 	WAFVersionNumber int
 }
 
@@ -222,8 +222,11 @@ func (c *Client) GetWAFVersion(i *GetWAFVersionInput) (*WAFVersion, error) {
 
 // UpdateWAFVersionInput is used as input to the UpdateWAFVersion function.
 type UpdateWAFVersionInput struct {
-	WAFID                            string
-	WAFVersionID                     string `jsonapi:"primary,waf_firewall"`
+	// The Web Application Firewall's id.
+	WAFID string
+	// the Web Application Firewall's version id.
+	WAFVersionID string `jsonapi:"primary,waf_firewall"`
+	// the Web Application Firewall's version number.
 	WAFVersionNumber                 int
 	Comment                          string `jsonapi:"attr,comment,omitempty"`
 	CRSValidateUTF8Encoding          bool   `jsonapi:"attr,crs_validate_utf8_encoding,omitempty"`
