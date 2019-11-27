@@ -84,6 +84,30 @@ type ListWAFVersionsInput struct {
 	Include string
 }
 
+func (i *ListWAFVersionsInput) formatFilters() map[string]string {
+
+	result := map[string]string{}
+	pairings := map[string]interface{}{
+		"page[size]":   i.PageSize,
+		"page[number]": i.PageNumber,
+		"include":      i.Include,
+	}
+
+	for key, value := range pairings {
+		switch t := reflect.TypeOf(value).String(); t {
+		case "string":
+			if value != "" {
+				result[key] = value.(string)
+			}
+		case "int":
+			if value != 0 {
+				result[key] = strconv.Itoa(value.(int))
+			}
+		}
+	}
+	return result
+}
+
 // ListWAFVersions returns the list of VAF versions for a given WAF id.
 func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, error) {
 
@@ -261,7 +285,9 @@ func (c *Client) UpdateWAFVersion(i *UpdateWAFVersionInput) (*WAFVersion, error)
 
 // LockWAFVersionInput used as input for locking a WAF version.
 type LockWAFVersionInput struct {
-	WAFID            string
+	// The Web Application Firewall's id.
+	WAFID string
+	// The Web Application Firewall's version number.
 	WAFVersionNumber int
 }
 
@@ -290,7 +316,9 @@ func (c *Client) LockWAFVersion(i *LockWAFVersionInput) (*WAFVersion, error) {
 
 // CloneWAFVersionInput used as input for cloning a WAF version.
 type CloneWAFVersionInput struct {
-	WAFID            string
+	// The Web Application Firewall's id.
+	WAFID string
+	// The Web Application Firewall's version number.
 	WAFVersionNumber int
 }
 
@@ -319,7 +347,9 @@ func (c *Client) CloneWAFVersion(i *CloneWAFVersionInput) (*WAFVersion, error) {
 
 // DeployWAFVersionInput used as input for deploying a WAF version.
 type DeployWAFVersionInput struct {
-	WAFID            string
+	// The Web Application Firewall's id.
+	WAFID string
+	// The Web Application Firewall's version number.
 	WAFVersionNumber int
 }
 
@@ -340,28 +370,4 @@ func (c *Client) DeployWAFVersion(i *DeployWAFVersionInput) error {
 		return err
 	}
 	return nil
-}
-
-func (i *ListWAFVersionsInput) formatFilters() map[string]string {
-
-	result := map[string]string{}
-	pairings := map[string]interface{}{
-		"page[size]":   i.PageSize,
-		"page[number]": i.PageNumber,
-		"include":      i.Include,
-	}
-
-	for key, value := range pairings {
-		switch t := reflect.TypeOf(value).String(); t {
-		case "string":
-			if value != "" {
-				result[key] = value.(string)
-			}
-		case "int":
-			if value != 0 {
-				result[key] = strconv.Itoa(value.(int))
-			}
-		}
-	}
-	return result
 }
