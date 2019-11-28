@@ -29,8 +29,6 @@ const (
 	ServiceTypeWasm = "wasm"
 )
 
-
-
 // testVersionLock is a lock around version creation because the Fastly API
 // kinda dies on concurrent requests to create a version.
 var testVersionLock sync.Mutex
@@ -74,7 +72,7 @@ func recordIgnoreBody(t *testing.T, fixture string, f func(*Client)) {
 		defer stopRecorder(t, r)
 
 		r.AddFilter(func(i *cassette.Interaction) error {
-			i.Request.Body=""
+			i.Request.Body = ""
 			return nil
 		})
 
@@ -83,8 +81,7 @@ func recordIgnoreBody(t *testing.T, fixture string, f func(*Client)) {
 	}
 }
 
-
-func getRecorder(t *testing.T, fixture string) *recorder.Recorder{
+func getRecorder(t *testing.T, fixture string) *recorder.Recorder {
 	r, err := recorder.New("fixtures/" + fixture)
 	if err != nil {
 		t.Fatal(err)
@@ -104,8 +101,6 @@ func stopRecorder(t *testing.T, r *recorder.Recorder) {
 		t.Fatal(err)
 	}
 }
-
-
 
 func recordRealtimeStats(t *testing.T, fixture string, f func(*RTSClient)) {
 	r, err := recorder.New("fixtures/" + fixture)
@@ -282,6 +277,32 @@ func createTestPool(t *testing.T, createFixture string, serviceId string, versio
 	return pool
 }
 
+func createTestLogging(t *testing.T, fixture, serviceID string, serviceNumber int) *Syslog {
+
+	var err error
+	var log *Syslog
+
+	record(t, fixture, func(c *Client) {
+		log, err = c.CreateSyslog(&CreateSyslogInput{
+			Service:       serviceID,
+			Version:       serviceNumber,
+			Name:          "test-syslog",
+			Address:       "example.com",
+			Hostname:      "example.com",
+			Port:          1234,
+			Token:         "abcd1234",
+			Format:        "format",
+			FormatVersion: 2,
+			MessageType:   "classic",
+		})
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return log
+}
+
 func deleteTestPool(t *testing.T, pool *Pool, deleteFixture string) {
 
 	var err error
@@ -291,6 +312,97 @@ func deleteTestPool(t *testing.T, pool *Pool, deleteFixture string) {
 			Service: pool.ServiceID,
 			Version: pool.Version,
 			Name:    pool.Name,
+		})
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func deleteTestLogging(t *testing.T, fixture, serviceID string, serviceNumber int) {
+
+	var err error
+
+	record(t, fixture, func(c *Client) {
+		err = c.DeleteSyslog(&DeleteSyslogInput{
+			Service: serviceID,
+			Version: serviceNumber,
+			Name:    "test-syslog",
+		})
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func createTestWAFCondition(t *testing.T, fixture, serviceID, name string, serviceNumber int) *Condition {
+
+	var err error
+	var condition *Condition
+
+	record(t, fixture, func(c *Client) {
+		condition, err = c.CreateCondition(&CreateConditionInput{
+			Service:   serviceID,
+			Version:   serviceNumber,
+			Name:      name,
+			Statement: "req.url~+\"index.html\"",
+			Type:      "PREFETCH", // This must be a prefetch condition
+			Priority:  1,
+		})
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return condition
+}
+
+func deleteTestWAFCondition(t *testing.T, fixture, serviceID, name string, serviceNumber int) {
+
+	var err error
+
+	record(t, fixture, func(c *Client) {
+		err = c.DeleteCondition(&DeleteConditionInput{
+			Service: serviceID,
+			Version: serviceNumber,
+			Name:    name,
+		})
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func createTestResponseObject(t *testing.T, fixture, serviceID, name string, serviceNumber int) *ResponseObject {
+
+	var err error
+	var ro *ResponseObject
+
+	record(t, fixture, func(c *Client) {
+		ro, err = c.CreateResponseObject(&CreateResponseObjectInput{
+			Service:     serviceID,
+			Version:     serviceNumber,
+			Name:        name,
+			Status:      200,
+			Response:    "Ok",
+			Content:     "abcd",
+			ContentType: "text/plain",
+		})
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return ro
+}
+
+func deleteTestResponseObject(t *testing.T, fixture, serviceID, name string, serviceNumber int) {
+
+	var err error
+
+	record(t, fixture, func(c *Client) {
+		err = c.DeleteResponseObject(&DeleteResponseObjectInput{
+			Service: serviceID,
+			Version: serviceNumber,
+			Name:    name,
 		})
 	})
 	if err != nil {
