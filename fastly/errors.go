@@ -94,7 +94,7 @@ var ErrMissingIP = errors.New("Missing requried field 'IP'")
 var ErrMissingEventID = errors.New("Missing required field 'EventID'")
 
 // ErrMissingWafID is an error that is returned when an input struct
-// requires a "WAFID" key, but one was not set
+// requires a "WAFID" key, but one was not set.
 var ErrMissingWAFID = errors.New("Missing required field 'WAFID'")
 
 // ErrMissingWAFVersionNumber is an error that is returned when an input struct
