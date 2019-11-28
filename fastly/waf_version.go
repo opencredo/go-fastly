@@ -288,7 +288,7 @@ func (c *Client) UpdateWAFVersion(i *UpdateWAFVersionInput) (*WAFVersion, error)
 
 // LockWAFVersionInput used as input for locking a WAF version.
 type LockWAFVersionInput struct {
-	// The Web Application Firewall's id.
+	// The Web Application Firewall's ID.
 	WAFID string
 	// The Web Application Firewall's version number.
 	WAFVersionNumber int
