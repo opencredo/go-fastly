@@ -319,7 +319,7 @@ func (c *Client) LockWAFVersion(i *LockWAFVersionInput) (*WAFVersion, error) {
 
 // CloneWAFVersionInput used as input for cloning a WAF version.
 type CloneWAFVersionInput struct {
-	// The Web Application Firewall's id.
+	// The Web Application Firewall's ID.
 	WAFID string
 	// The Web Application Firewall's version number.
 	WAFVersionNumber int
