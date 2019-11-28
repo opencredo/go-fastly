@@ -108,7 +108,7 @@ func (i *ListWAFVersionsInput) formatFilters() map[string]string {
 	return result
 }
 
-// ListWAFVersions returns the list of VAF versions for a given WAF id.
+// ListWAFVersions returns the list of VAF versions for a given WAF ID.
 func (c *Client) ListWAFVersions(i *ListWAFVersionsInput) (*WAFVersionResponse, error) {
 
 	if i.WAFID == "" {
