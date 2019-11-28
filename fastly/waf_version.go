@@ -158,7 +158,7 @@ type ListAllWAFVersionsInput struct {
 	Include string
 }
 
-// ListAllWAFVersions returns the complete list of WAF versions for a given WAF id. It iterates through
+// ListAllWAFVersions returns the complete list of WAF versions for a given WAF ID. It iterates through
 // all existing pages to ensure all waf versions are returned at once.
 func (c *Client) ListAllWAFVersions(i *ListAllWAFVersionsInput) (*WAFVersionResponse, error) {
 
