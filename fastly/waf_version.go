@@ -74,7 +74,7 @@ type WAFVersionResponse struct {
 
 // ListWAFVersionsInput used as input for listing WAF versions.
 type ListWAFVersionsInput struct {
-	// The Web Application Firewall's id.
+	// The Web Application Firewall's ID.
 	WAFID string
 	// Limit the number records returned.
 	PageSize int
