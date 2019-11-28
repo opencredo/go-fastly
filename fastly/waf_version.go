@@ -15,8 +15,8 @@ import (
 // decoding into.
 var WAFVersionType = reflect.TypeOf(new(WAFVersion))
 
-// paginationPageSize used as PageSize by the ListAllWAFVersions function.
-const paginationPageSize = 100
+// WAFPaginationPageSize used as the default pagination page size by the WAF related requests.
+const WAFPaginationPageSize = 100
 
 // WAFVersion is the information about a WAF version object.
 type WAFVersion struct {
@@ -173,7 +173,7 @@ func (c *Client) ListAllWAFVersions(i *ListAllWAFVersionsInput) (*WAFVersionResp
 			WAFID:      i.WAFID,
 			Include:    i.Include,
 			PageNumber: currentPage,
-			PageSize:   paginationPageSize,
+			PageSize:   WAFPaginationPageSize,
 		})
 		if err != nil {
 			return r, err
