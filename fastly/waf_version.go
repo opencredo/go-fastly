@@ -350,7 +350,7 @@ func (c *Client) CloneWAFVersion(i *CloneWAFVersionInput) (*WAFVersion, error) {
 
 // DeployWAFVersionInput used as input for deploying a WAF version.
 type DeployWAFVersionInput struct {
-	// The Web Application Firewall's id.
+	// The Web Application Firewall's ID.
 	WAFID string
 	// The Web Application Firewall's version number.
 	WAFVersionNumber int
