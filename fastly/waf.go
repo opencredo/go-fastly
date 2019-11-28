@@ -20,7 +20,7 @@ type WAFConfigurationSet struct {
 	ID string `jsonapi:"primary,configuration_set"`
 }
 
-// WAF is the information about a firewall object.
+// WAF  is the information about a firewall object.
 type WAF struct {
 	ID                             string     `jsonapi:"primary,waf_firewall"`
 	ServiceID                      string     `jsonapi:"attr,service_id"`
