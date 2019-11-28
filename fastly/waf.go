@@ -827,7 +827,7 @@ type GetWAFRuleStatusesResponse struct {
 	Rules []*WAFRuleStatus
 }
 
-// metaInfo stores information about the result returned by the server
+// metaInfo stores information about the result returned by the server.
 type metaInfo struct {
 	CurrentPage int `json:"current_page,omitempty"`
 	PerPage     int `json:"per_page,omitempty"`
