@@ -190,7 +190,7 @@ func (c *Client) ListAllWAFVersions(i *ListAllWAFVersionsInput) (*WAFVersionResp
 
 // GetWAFVersionInput used as input for GetWAFVersion function.
 type GetWAFVersionInput struct {
-	// The Web Application Firewall's id.
+	// The Web Application Firewall's ID.
 	WAFID string
 	// the Web Application Firewall's version number.
 	WAFVersionNumber int
