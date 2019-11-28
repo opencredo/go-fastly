@@ -222,7 +222,7 @@ func (c *Client) GetWAFVersion(i *GetWAFVersionInput) (*WAFVersion, error) {
 
 // UpdateWAFVersionInput is used as input to the UpdateWAFVersion function.
 type UpdateWAFVersionInput struct {
-	// The Web Application Firewall's id.
+	// The Web Application Firewall's ID.
 	WAFID string
 	// the Web Application Firewall's version id.
 	WAFVersionID string `jsonapi:"primary,waf_firewall"`
