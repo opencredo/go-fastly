@@ -50,19 +50,18 @@ func (l *ListTLSDomainsInput) formatFilters() map[string]string {
 	}
 
 	for key, value := range pairings {
-		switch t := reflect.TypeOf(value).String(); t {
-		case "string":
-			if value != "" {
-				result[key] = value.(string)
+		switch t := value.(type) {
+		case string:
+			if t != "" {
+				result[key] = t
 			}
-		case "int":
-			if value != 0 {
-				result[key] = strconv.Itoa(value.(int))
+		case int:
+			if t != 0 {
+				result[key] = strconv.Itoa(t)
 			}
-		case "*bool":
-			ptr := reflect.ValueOf(value)
-			if !ptr.IsNil() {
-				result[key] = strconv.FormatBool(ptr.Elem().Bool())
+		case *bool:
+			if t != nil {
+				result[key] = strconv.FormatBool(*t)
 			}
 		}
 	}
