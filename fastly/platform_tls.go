@@ -132,6 +132,7 @@ func (c *Client) GetBulkCertificate(i *GetBulkCertificateInput) (*BulkCertificat
 type CreateBulkCertificateInput struct {
 	CertBlob          string              `jsonapi:"attr,cert_blob"`
 	IntermediatesBlob string              `jsonapi:"attr,intermediates_blob"`
+	AllowUntrusted    bool                `jsonapi:"attr,allow_untrusted_root"`
 	TLSConfigurations []*TLSConfiguration `jsonapi:"relation,tls_configurations,tls_configuration"`
 }
 
