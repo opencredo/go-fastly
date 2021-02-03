@@ -41,14 +41,14 @@ func TestClient_TLSSubscription(t *testing.T) {
 	if len(listSubscriptions) < 1 {
 		t.Errorf("bad TLS subscriptions: %v", listSubscriptions)
 	}
-	if listSubscriptions[0].TLSDomains == nil {
+	if listSubscriptions[0].Domains == nil {
 		t.Errorf("TLS Domains relation should not be nil: %v", listSubscriptions)
 	}
-	if len(listSubscriptions[0].TLSDomains) < 1 {
+	if len(listSubscriptions[0].Domains) < 1 {
 		t.Errorf("TLS Domains list should not be empty: %v", listSubscriptions)
 	}
-	if listSubscriptions[0].TLSDomains[0].ID != subscription.TLSDomains[0].ID {
-		t.Errorf("bad Domain ID: %s (%s)", listSubscriptions[0].TLSDomains[0].ID, subscription.TLSDomains[0].ID)
+	if listSubscriptions[0].Domains[0].ID != subscription.Domains[0].ID {
+		t.Errorf("bad Domain ID: %s (%s)", listSubscriptions[0].Domains[0].ID, subscription.Domains[0].ID)
 	}
 
 	var retrievedSubscription *TLSSubscription

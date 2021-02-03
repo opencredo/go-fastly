@@ -17,7 +17,7 @@ type TLSSubscription struct {
 	CreatedAt            *time.Time                    `jsonapi:"attr,created_at,iso8601"`
 	UpdatedAt            *time.Time                    `jsonapi:"attr,updated_at,iso8601"`
 	Configuration        *TLSConfiguration             `jsonapi:"relation,tls_configuration"`
-	TLSDomains           []*TLSDomain                  `jsonapi:"relation,tls_domains"`
+	Domains              []*TLSDomain                  `jsonapi:"relation,tls_domains"`
 	Certificates         []*TLSSubscriptionCertificate `jsonapi:"relation,tls_certificates"`
 	Authorizations       []*TLSAuthorizations          `jsonapi:"relation,tls_authorizations"`
 }

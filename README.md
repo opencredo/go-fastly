@@ -1,9 +1,10 @@
 # Go Fastly
 
-[![Go Documentation](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)][godocs]
+[![Go Documentation](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)][latest]
 
-[godocs]: https://pkg.go.dev/github.com/fastly/go-fastly/fastly?tab=doc
-[v2]: https://pkg.go.dev/github.com/fastly/go-fastly/v2
+[latest]: https://pkg.go.dev/github.com/fastly/go-fastly/v3/fastly
+[v3]: https://pkg.go.dev/github.com/fastly/go-fastly/v3/fastly
+[v2]: https://pkg.go.dev/github.com/fastly/go-fastly/v2/fastly
 [v1]: https://pkg.go.dev/github.com/fastly/go-fastly
 
 Go Fastly is a Golang API client for interacting with most facets of the
@@ -17,7 +18,7 @@ so you must be running Go 1.11 or higher.
 ## Usage
 
 ```go
-import "github.com/fastly/go-fastly/v2/fastly"
+import "github.com/fastly/go-fastly/v3/fastly"
 ```
 
 ## Migrating from v1 to v2
@@ -30,6 +31,16 @@ The move from major version [1][v1] to [2][v2] has resulted in a couple of funda
 The move to more consistent field names in some cases will have resulted in the corresponding sentinel error name to be updated also. For example, `ServiceID` has resulted in a change from `ErrMissingService` to `ErrMissingServiceID`.
 
 The change in type for [basic types](https://tour.golang.org/basics/11) that are optional on input structs related to write/update operations is designed to avoid unexpected behaviours when dealing with their zero value (see [this reference](https://willnorris.com/2014/05/go-rest-apis-and-pointers/) for more details). As part of this change we now provide [helper functions](./fastly/basictypes_helper.go) to assist with generating the new pointer types required.
+
+> Note: some read/list operations require fields to be provided but if omitted a zero value will be used when marshaling the data structure into JSON. This too can cause confusion, which is why some input structs define their mandatory fields as pointers (to ensure that the backend can distinguish between a zero value and an omitted field).
+
+## Migrating from v2 to v3
+
+There were a few breaking changes introduced in [`v3.0.0`][v3]:
+
+1. A new `FieldError` abstraction for validating API struct fields.
+2. Changing some mandatory fields to Optional (and vice-versa) to better support more _practical_ API usage.
+3. Avoid generic ID field when more explicit naming would be clearer.
 
 ## Examples
 
@@ -128,7 +139,7 @@ fmt.Printf("%t\n", activeVersion.Locked)
 ```
 
 More information can be found in the
-[Fastly Godoc][godocs].
+[Fastly Godoc][latest].
 
 ## Developing
 
@@ -148,56 +159,51 @@ More information can be found in the
 
 ## Testing
 
-Go Fastly uses [go-vcr](https://github.com/dnaeon/go-vcr) to "record" and
-"replay" API request fixtures to improve the speed and portability of
-integration tests. The test suite uses a single test service ID for all test
-fixtures.
+Go Fastly uses [go-vcr](https://github.com/dnaeon/go-vcr) to "record" and "replay" API request fixtures to improve the speed and portability of integration tests. The test suite uses a single test service ID for all test fixtures.
 
-Contributors _without_ access to the test service can disable go-vcr, set a
-different test service ID, and use their own API credentials by setting the
-following environment variables:
-* `VCR_DISABLE`: disables go-vcr fixture recording and replay
-  * The `test-full` make target runs the tests with go-vcr disabled.
-* `FASTLY_TEST_SERVICE_ID`: set default service ID used by the test suite
-  * **NOTE: A quick way to create a resource for testing is to use the following [Fastly CLI](https://github.com/fastly/cli) command:**
-  ```
-  $ fastly service create --type=vcl --name=foo
-  ```
-* `FASTLY_API_KEY`: set a Fastly API key to be used by the test suite
+Contributors without access to the test service can still update the fixtures but with some additional steps required. Below is an example workflow for updating a set of fixture files (where `...` should be replaced with an appropriate value):
 
 ```sh
-make test-full \
-  FASTLY_TEST_SERVICE_ID="SERVICEID" \
-  FASTLY_API_KEY="TESTAPIKEY" \
-  TESTARGS="-run=Logentries"
+# Remove all yaml fixture files from the specified directory.
+#
+rm -r fastly/fixtures/.../*
+
+# Run a subsection of the tests.
+# This will cause the deleted fixtures to be recreated.
+# 
+# FASTLY_TEST_SERVICE_ID: should correspond to a real service you control.
+# FASTLY_API_KEY: should be a real token associated with the Service you control.
+# TESTARGS: allows you to use the -run flag of the 'go test' command.
+# 
+make test FASTLY_TEST_SERVICE_ID="..." FASTLY_API_KEY="..." TESTARGS="-run=..."
 ```
 
-When adding or updating client code and integration tests, contributors may
-record a new set of fixtures by running the tests without `VCR_DISABLE`. Before
-submitting a pull request with new or updated fixtures, we ask that contributors
-update them to use the default service ID by running `make fix-fixtures` with
-`FASTLY_TEST_SERVICE_ID` set to the same value used to run your tests.
+> **NOTE**: to run the tests with go-vcr disabled, set `VCR_DISABLE=1` (`make test-full` does this).
 
-If you are **updating** an existing resource, in order to force go-vcr to re-record,
-rather than use the existing recorded values, you will have to removed the recorded
-values for that resource via `rm -r fastly/fixtures/<resource_name>`. **If you don't
-remove the existing recorded values, you will see the following error**:
+When adding or updating client code and integration tests, contributors should record a new set of fixtures. Before submitting a pull request with new or updated fixtures, we ask that contributors update them to use the default service ID by running `make fix-fixtures` with `FASTLY_TEST_SERVICE_ID` set to the same value used to run your tests.
 
-```
-Post "https://api.fastly.com/service/SERVICEID/version": Requested interaction not found
-```
-
-Example (`make test`, `make fix-fixtures`):
 ```sh
-make test \
-  FASTLY_TEST_SERVICE_ID="SERVICEID" \
-  FASTLY_API_KEY="TESTAPIKEY" \
-  TESTARGS="-run=Logentries"
-make fix-fixtures FASTLY_TEST_SERVICE_ID="SERVICEID"
+make fix-fixtures FASTLY_TEST_SERVICE_ID="..."
+```
 
-# Re-run test suite with newly recorded fixtures
-unset FASTLY_TEST_SERVICE_ID FASTLY_API_KEY
-make test
+### Important Test Tips!
+
+There are two important things external contributors need to do when running the tests:
+
+1. Use a 'temporary' token for running the tests (only if regenerating the token fixtures).
+2. Redact sensitive information in your fixtures.
+
+You only need to use a temporary token when regenerating the 'token' fixtures. This is because there is a test to validate the _revoking_ of a token using the [`/tokens/self`](https://developer.fastly.com/reference/api/auth/#revoke-token-current) API endpoint, for which running this test (if there are no existing fixtures) will cause the token you provided at your command-line shell to be revoked/expired. So please don't use a token that's also used by a real/running application! Otherwise you'll discover those application may stop working as you've inadvertently caused your token to be revoked.
+
+In general, any time you regenerate fixtures you should be sure to redact any sensitive information served back from the API, but specifically there is a test which _creates_ tokens that needs special attention: when regenerating the token fixtures this will require you to enter your actual account credentials (i.e. username/password) into the `token_test.go` file. You'll want to ensure that once the fixtures are create that you redact those values from both the generated fixture as well as the go test file itself. For example...
+
+```go
+input := &CreateTokenInput{
+	Name:     "my-test-token",
+	Scope:    "global",
+	Username: "XXXXXXXXXXXXXXXXXXXXXX",
+	Password: "XXXXXXXXXXXXXXXXXXXXXX",
+}
 ```
 
 ## Contributing
